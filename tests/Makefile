@@ -47,10 +47,11 @@ $(OUT_DIR)/hash_jen.o: hash_jen.c
 	mkdir -p $(OUT_DIR)
 	$(CC) -c -o $@ $<
 
-$(OUT_DIR)/hash_bbt.o: ../bbt/hash_bbt.h 
-	$(MAKE) -C ../bbt
+$(OUT_DIR)/hash_bbt.o:
+	$(MAKE) -C ../bbt $@
 
-$(OUT_DIR)/hash_tables.o: $(OUT_DIR)/hash_jen.o
+$(OUT_DIR)/hash_tables.o:
+	$(MAKE) -C ../bbt $@
 
 #--------------------------------------
 $(OUT_DIR)/hash02_basic: hash02_basic.c $(OUT_DIR)/hash_tables.o $(OUT_DIR)/hash_bbt.o
