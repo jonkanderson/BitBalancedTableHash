@@ -70,9 +70,10 @@ void bbt_hash_add(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz) 
 	for (unsigned i=0; i<input_sz; i++, p++) {
 		bsel.value = *p;
 
-		/* I have tried various configurations of extracting advance 
-		 * and shift.  The version I settled on is to use modulo and do 
-		 * a round-robin on each. (i%4)
+		/* I have tried various configurations of extracting advance
+		 * and shift.  All four of these seem to work similarly. The 
+		 * version I settled on is to use modulo and do a round-robin on 
+		 * each. (i%4)
 		 */
 		//switch(1) {
 		//switch(GET_METHOD(methodMask1)*2 + GET_METHOD(methodMask2)) {

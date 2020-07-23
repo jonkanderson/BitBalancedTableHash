@@ -1,5 +1,5 @@
 /*
- * This version uses the my mix hash.
+ * This version uses the my new hash.
  * 
  * Read stdin line by line and hash it. The each byte position is written 
  * into five binary files for efficiency analysis. (The last is all combined.)

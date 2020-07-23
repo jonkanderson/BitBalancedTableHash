@@ -12,19 +12,23 @@ There is a basic `Makefile` in the `tests` directory and in the `bbt` directory.
 
 ## Background
 
-[Hashing functions](https://en.wikipedia.org/wiki/Hash_function) is a significantly studied area of computer science.  They are used, in particular, for efficient management of a [hash table](https://en.wikipedia.org/wiki/Hash_table).  The Bit-Balanced Table Hash function was developed as an experiment for learning more about the entropy equation in [information theory](https://en.wikipedia.org/wiki/Entropy_(information_theory)).
+The [hashing function](https://en.wikipedia.org/wiki/Hash_function) is a well-studied area of computer science.  They are used, in particular, for efficient management of a [hash table](https://en.wikipedia.org/wiki/Hash_table). Ideally, two inputs that are highly similar should produce hashes which are significantly different.
+
+This Bit-Balanced Table Hash function was developed as an experiment for learning more about the entropy equation in [information theory](https://en.wikipedia.org/wiki/Entropy_(information_theory)).
 
 ## Motivation
 
-Developing a hashing fuction is a tricky beast.  Any idea to [obfuscate](https://en.wikipedia.org/wiki/Obfuscation) the resulting hash may seem clever to the inventor but could potentially *lose* entropy rather than provide any gain.
+Developing a hashing function is a tricky beast.  Any idea to [obfuscate](https://en.wikipedia.org/wiki/Obfuscation) the resulting hash may seem clever to the inventor but can often *lose* entropy rather than provide any gain.
 
 The main principles of this hash were based on the following observations:
 
 - The [bitwise operators](https://en.wikipedia.org/wiki/Bitwise_operation) *xor* and *rotate* are particularly safe as reduction operators when hashing.
-- Input data is particularly *unsafe* for inclusion directly into a hash.  (Ideally, two inputs that are highly similar should produce hashes that are significantly different.)
+- Input data is particularly *unsafe* for inclusion into a hash directly.
 - Bitstrings which are balanced with an equal number of 1's versus 0's will less likely contribute bias as to the number of 1's in the resulting hash.
-- A table of balanced bitstrings could be used as the *only* source for contributing to the resulting hash.
-- Input data could be interpreteted as byte-instructions.  So, in this implementation, each byte provides two pieces of information: *advance* and *shift*.  The *advance* is the number of slots to advance an index in the table with a minimum value of 1.  The *shift* idicates the number of bits to rotate the table value before including it into the hash.  The resulting value is then combined with the hash using an *xor* operation.
+- It is feasible that a table of balanced bitstrings could be used as the *only* source for contributing to a resulting hash.
+- Input data could be interpreted as byte-instructions.
+
+So, in this hash implementation, each byte provides two pieces of information: *advance* and *shift*.  The *advance* is the number of slots to advance an index in the table with a minimum value of 1.  The *shift* indicates the number of bits to rotate the table value before including it into the hash.  The resulting value is then combined into the hash using an *xor* operation.  Each *xor* will toggle exactly half of the bits of the hash.
 
 ## Equations
 
@@ -34,22 +38,22 @@ $$
 h = -\sum_i{p_i\cdot\log{p_i}}
 $$
 
-Efficiency (&eta;) is entropy relative to the maximum expected bits of entropy.  It is a value between 0 and 1.
+Efficiency (&eta;) is entropy relative to the maximum expected bits of entropy.  It has a value between 0 and 1.
 
 $$
 \eta = \frac{h}{h_\text{max}}
 $$
 
-In developing this hash I found that the following calculation a rather useful metric for determining whether I am losing bits of entropy:
+In developing this hash I found the following calculation to be a rather useful metric for determining whether I am losing entropy:
 
 $$
-\text{logHComplement} = \ln{(1-h)}
+\text{logHComplement} = \ln{(1-\eta)}
 $$
 
-Using an empirically derived regression, I used the above equation to determine if my entropy calculations were close to what should be expected by comparison to what purely random values produce.
+Using an empirically derived regression, I used the above equation to determine if my entropy calculations were close to what should be expected by comparison to purely random values.
 
 ## Conclusion
 
-I am not sure what was most valuable from this experiment. The hashing function was developed only as a motivation for understanding entropy.  As such, the testing process was possibly more valuable than the hash itself.  Finding a reliable metric to determine whether I am losing entropy within the development process was particularly of interest.  Regarding the hash, uderstand that I implemented no comparison to Keccak or any other [cryptographic hash function](https://en.wikipedia.org/wiki/Cryptographic_hash_function).
+I am not sure what was most valuable from this experiment. The hashing function was developed as a motivation for understanding entropy.  As such, the testing process was possibly more valuable than the hash itself.  Finding a reliable metric to determine whether I am losing entropy within the development process was particularly of interest.  As a disclaimer regarding the hash, understand that I implemented no comparison to Keccak or any other [cryptographic hash function](https://en.wikipedia.org/wiki/Cryptographic_hash_function).
 
 Jon Anderson (jonkanderson@gmail.com)
