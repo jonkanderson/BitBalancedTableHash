@@ -1,6 +1,6 @@
 # BitBalancedTableHash
 
-This is an implementation of a hashing function that is based on a table of randomized unsigned integers where the binary representation of each number has an equal number of 1's versus 0's.  I am not considering this a [cryptographically safe](https://en.wikipedia.org/wiki/Cryptographic_hash_function) function.
+This is an implementation of a non-cryptographic hashing function. The function is evaluated using the entropy equation and compared to a Jenkin's hash.
 
 ## Prerequisites
 
@@ -54,6 +54,8 @@ Using an empirically derived regression, I used the above equation to determine 
 
 ## Conclusion
 
-I am not sure what was most valuable from this experiment. The hashing function was developed as a motivation for understanding entropy.  As such, the testing process was possibly more valuable than the hash itself.  Finding a reliable metric to determine whether I am losing entropy within the development process was particularly of interest.  As a disclaimer regarding the hash, understand that I implemented no comparison to Keccak or any other [cryptographic hash function](https://en.wikipedia.org/wiki/Cryptographic_hash_function).
+I am not sure what was most valuable from this experiment. The hashing function was developed as a motivation for understanding entropy.  As such, the testing process was possibly more valuable than the hash itself.  Finding a reliable metric to determine whether I am losing entropy within the development process was particularly of interest. Test `make test6_compare_one_char` currently shows that Jenkin's performs better than this hash.
+
+As a disclaimer regarding the hash, understand that I implemented no comparison to Keccak or any other [cryptographic hash function](https://en.wikipedia.org/wiki/Cryptographic_hash_function).
 
 Jon Anderson (jonkanderson@gmail.com)

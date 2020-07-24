@@ -4,6 +4,7 @@ CC=/usr/bin/clang
 RANDOM_DATA_FILE=$(shell realpath ../data/RandomNumbers_20180911)
 
 all: test6_compare
+	@echo "Try 'make test6_compare_one_char' to test strings of only one character."
 	@echo "Try 'make test6_big_compare' for a larger test."
 	@echo "Try 'make test6_leaks' to test using valgrind."
 
@@ -114,7 +115,17 @@ $(OUT_DIR)/test5_data.txt:
 			) ; done > $@
 
 #--------------------------------------
-$(OUT_DIR)/compare_hashes: compare_hashes.c $(OUT_DIR)/hash_jen.o $(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_tables.o
+$(OUT_DIR)/comparison_stats.o: comparison_stats.c comparison_stats.h
+	mkdir -p $(OUT_DIR)
+	$(CC) -c -o $@ $<
+
+COMPARE_HASHES_DEPS= \
+	$(OUT_DIR)/comparison_stats.o \
+	$(OUT_DIR)/hash_jen.o \
+	$(OUT_DIR)/hash_bbt.o \
+	$(OUT_DIR)/hash_tables.o
+
+$(OUT_DIR)/compare_hashes: compare_hashes.c $(COMPARE_HASHES_DEPS)
 	mkdir -p $(OUT_DIR)
 	$(CC) -g -o $@ -I $(OUT_DIR) -I ../bbt $^ -lgsl
 
@@ -124,7 +135,13 @@ test6_compare: $(OUT_DIR)/compare_hashes
 test6_big_compare: $(OUT_DIR)/compare_hashes $(OUT_DIR)/test4_data
 	cat $(OUT_DIR)/test4_data | exec $<
 
-# There are no leaks, but there are errors re. use of uninitialized value.
+$(OUT_DIR)/compare_hashes_one_char: compare_hashes_one_char.c $(COMPARE_HASHES_DEPS)
+	mkdir -p $(OUT_DIR)
+	$(CC) -g -o $@ -I $(OUT_DIR) -I ../bbt $^ -lgsl
+
+test6_compare_one_char: $(OUT_DIR)/compare_hashes_one_char
+	$(TEST_HASH_CMD) | exec $<
+
 test6_leaks: $(OUT_DIR)/compare_hashes
 	$(TEST_HASH_CMD) | head -n 500 | valgrind \
 		--leak-check=full --track-origins=yes --show-error-list=yes \

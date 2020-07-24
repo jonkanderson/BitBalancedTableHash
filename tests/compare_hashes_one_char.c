@@ -1,6 +1,6 @@
 /* This takes two hash methods and calculates the entropy for each bit 
- * position separately.  The position of least entropy is also determined 
- * in the report.
+ * position separately.  This version is similar to compare_hashes.c
+ * except that the input is a sequence of only one character.
  */
 
 #include "comparison_stats.h"
@@ -32,29 +32,37 @@ uint64_t calc_hash_bbt(void *hash_info, unsigned char *str, unsigned length) {
 	return hash;
 }
 
-/* Strings from stdin are truncated to STR_BUFFER_SZ-1 */
-#define STR_BUFFER_SZ 512
+#define STR_BUFFER_SZ 1024*5
 
 int main(int argc, char **argv) {
 	struct comparison_stats jen_stats, bbt_stats;
 	bbt_hash_ctxt bbt_hc;
-	char b[STR_BUFFER_SZ];
+	char b[STR_BUFFER_SZ + 1];
 
-	basic_init_comparison_stats(&jen_stats, 32);
-	jen_stats.calc_hash = calc_hash_jen;
+	for (int myChar=1; myChar<256; myChar++) {
+		printf("---------------- Character %d\n", myChar);
 
-	bbt_hash_init(&bbt_hc, &(BBT_HASH_TABLE));
-	basic_init_comparison_stats(&bbt_stats, BBT_HASH_WIDTH);
-	bbt_stats.calc_hash = calc_hash_bbt;
-	bbt_stats.hash_info = &bbt_hc;
+		basic_init_comparison_stats(&jen_stats, 32);
+		jen_stats.calc_hash = calc_hash_jen;
 
-	while (fgets(b, STR_BUFFER_SZ-1, stdin)) {
-		process_comparison_stats(&jen_stats, (unsigned char *)b, strlen(b));
-		process_comparison_stats(&bbt_stats, (unsigned char *)b, strlen(b));
+		bbt_hash_init(&bbt_hc, &(BBT_HASH_TABLE));
+		basic_init_comparison_stats(&bbt_stats, BBT_HASH_WIDTH);
+		bbt_stats.calc_hash = calc_hash_bbt;
+		bbt_stats.hash_info = &bbt_hc;
+
+		for (int i=0; i<STR_BUFFER_SZ; i++) {
+			b[i] = myChar;
+		}
+		b[STR_BUFFER_SZ] = '\0';
+
+		for (int i=2; i<STR_BUFFER_SZ; i++) {
+			process_comparison_stats(&jen_stats, (unsigned char *)b, i);
+			process_comparison_stats(&bbt_stats, (unsigned char *)b, i);
+		}
+
+		report_comparison_stats(&jen_stats, "Jenkin's Hash", report_type_short);
+		report_comparison_stats(&bbt_stats, "Bit-balanced Table Hash", report_type_short);
 	}
-
-	report_comparison_stats(&jen_stats, "Jenkin's Hash", report_type_long);
-	report_comparison_stats(&bbt_stats, "Bit-balanced Table Hash", report_type_long);
 
 	free_comparison_stats(&jen_stats);
 	free_comparison_stats(&bbt_stats);
