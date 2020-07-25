@@ -20,7 +20,7 @@ uint64_t calc_hash_jen(void *hash_info, unsigned char *str, unsigned length) {
 
 /* Bit-balanced Table hash */
 #include "hash_bbt.h"
-#define BBT_HASH_TABLE bbt_table_1
+#define BBT_HASH_TABLE bbt_table_3
 extern struct bbt_hash_table BBT_HASH_TABLE;
 
 uint64_t calc_hash_bbt(void *hash_info, unsigned char *str, unsigned length) {

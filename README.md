@@ -52,9 +52,22 @@ $$
 
 Using an empirically derived regression, I used the above equation to determine if my entropy calculations were close to what should be expected by comparison to purely random values.
 
+## Results
+
+Both this hash and the Jenkin's hash appear to be similar using the test `make test6_compare`.  With a dictionary of words as input, the test evaluates each hash by individually calculating the entropy related  to each bit position and then making note of the bit position with the minimum entropy.  The test `make test6_compare_one_char` is a more diabolical comparison.  It also evaluates individual bit positions, however the input is a sequence of single characters with progressively longer string lengths. Both hashes appear to perform similarly.  Two changes improved the performance of this hash:
+
+- I included a line to convolute the input byte by performing an xor of the byte with the string position squared.
+- Longer tables of prime length seem to perform better.
+
+## Future
+
+Appropriate statistical analysis is currently missing. For instance, performing confidence intervals on the *logHComplement* metric would be helpful.
+
+Also missing are repeatable unit tests. Up to this point most of the testing output has been variable due to randomly generated tables.  (Yes, it is not exactly [TDD](https://en.wikipedia.org/wiki/Test-driven_development).  But as the code morphs, the results are non-deterministic.  Unit tests could be added which assert a minimum bounds however.)
+
 ## Conclusion
 
-I am not sure what was most valuable from this experiment. The hashing function was developed as a motivation for understanding entropy.  As such, the testing process was possibly more valuable than the hash itself.  Finding a reliable metric to determine whether I am losing entropy within the development process was particularly of interest. Test `make test6_compare_one_char` currently shows that Jenkin's performs better than this hash.
+I am not sure what was most valuable from this experiment. The hashing function was developed as a motivation for understanding entropy.  As such, the testing process was possibly more valuable than the hash itself.  Finding a reliable metric to determine whether I am losing entropy within the development process was particularly of interest.
 
 As a disclaimer regarding the hash, understand that I implemented no comparison to Keccak or any other [cryptographic hash function](https://en.wikipedia.org/wiki/Cryptographic_hash_function).
 

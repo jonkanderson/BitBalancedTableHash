@@ -68,7 +68,9 @@ void bbt_hash_add(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz) 
 
 	unsigned char *p = input;
 	for (unsigned i=0; i<input_sz; i++, p++) {
-		bsel.value = *p;
+		//bsel.value = *p;
+		// The variation below modifies the command byte using an independent data source, i*i.
+		bsel.value = (*p) ^ ((i*i) ^ 0xFF);
 
 		/* I have tried various configurations of extracting advance
 		 * and shift.  All four of these seem to work similarly. The 
