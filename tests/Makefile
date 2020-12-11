@@ -8,6 +8,8 @@ all: test6_compare
 	@echo "Try 'make test6_big_compare' for a larger test."
 	@echo "Try 'make test6_leaks' to test using valgrind."
 
+include ../bbt/settings.mk
+
 all_early_tests:
 	@echo "===================== Examine efficient data"
 	$(MAKE) test1_efficient
@@ -57,7 +59,8 @@ $(OUT_DIR)/hash_tables.o:
 #--------------------------------------
 $(OUT_DIR)/hash02_basic: hash02_basic.c $(OUT_DIR)/hash_tables.o $(OUT_DIR)/hash_bbt.o
 	mkdir -p $(OUT_DIR)
-	$(CC) -o $@ $< -I ../bbt $(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_tables.o
+	$(CC) -o $@ $< -I ../bbt \
+		$(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_tables.o -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH)
 
 test2: $(OUT_DIR)/hash02_basic
 	exec $<
@@ -75,7 +78,8 @@ test3-jen: $(OUT_DIR)/test_hash_jen $(OUT_DIR)/exp01
 
 $(OUT_DIR)/test_hash_bbt: test_hash_bbt.c $(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_tables.o ../bbt/hash_bbt.h 
 	mkdir -p $(OUT_DIR)
-	$(CC) -g -o $@ $< -I ../bbt $(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_tables.o
+	$(CC) -g -o $@ $< -I ../bbt \
+		$(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_tables.o -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH)
 
 test3-bbt: $(OUT_DIR)/test_hash_bbt $(OUT_DIR)/exp01
 	$(TEST_HASH_CMD) | exec $<
@@ -127,7 +131,7 @@ COMPARE_HASHES_DEPS= \
 
 $(OUT_DIR)/compare_hashes: compare_hashes.c $(COMPARE_HASHES_DEPS)
 	mkdir -p $(OUT_DIR)
-	$(CC) -g -o $@ -I $(OUT_DIR) -I ../bbt $^ -lgsl
+	$(CC) -g -o $@ -I $(OUT_DIR) -I ../bbt $^ -lgsl -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH)
 
 test6_compare: $(OUT_DIR)/compare_hashes
 	$(TEST_HASH_CMD) | exec $<
@@ -137,7 +141,7 @@ test6_big_compare: $(OUT_DIR)/compare_hashes $(OUT_DIR)/test4_data
 
 $(OUT_DIR)/compare_hashes_one_char: compare_hashes_one_char.c $(COMPARE_HASHES_DEPS)
 	mkdir -p $(OUT_DIR)
-	$(CC) -g -o $@ -I $(OUT_DIR) -I ../bbt $^ -lgsl
+	$(CC) -g -o $@ -I $(OUT_DIR) -I ../bbt $^ -lgsl -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH)
 
 test6_compare_one_char: $(OUT_DIR)/compare_hashes_one_char
 	$(TEST_HASH_CMD) | exec $<

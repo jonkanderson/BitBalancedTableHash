@@ -22,7 +22,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #include "hash_bbt.h"
 
-void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_table *ht) {
+void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_params *ht) {
 	ctxt->table = ht;
 	ctxt->pos = 0;
 	ctxt->hash = 0;
@@ -58,11 +58,11 @@ typedef union {
 
 #define GET_METHOD(ATTR) (((ctxt->hash & table->ATTR)==0)?0:1)
 
-void bbt_hash_add(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz) {
+void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz) {
 	mh_bit_select bsel;
 	unsigned int shift, advance;
 	bbt_hash_t buffer;
-	struct bbt_hash_table *table = ctxt->table;
+	struct bbt_hash_params *table = ctxt->table;
 	
 	if (input_sz == 0) return;
 

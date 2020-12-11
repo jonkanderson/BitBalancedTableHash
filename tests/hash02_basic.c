@@ -10,7 +10,7 @@
 #include "hash_bbt.h"
 
 #define HASH_TABLE bbt_table_1
-extern struct bbt_hash_table HASH_TABLE;
+extern struct bbt_hash_params HASH_TABLE;
 
 #include "hash_jen.c"
 const unsigned jen_init = 37428652;
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 		hJen = jen_hash((unsigned char *)s, strlen(s), jen_init);
 		printf("J: %u \"%s\"\n", hJen, s);
 
-		bbt_hash_add(&hc, (unsigned char *)s, strlen(s));
+		bbt_hash_calc(&hc, (unsigned char *)s, strlen(s));
 		hBbt = BBT_HASH_GET(&hc);
 		printf("M: %lu \"%s\"\n", hBbt, s);
 		bbt_hash_reset(&hc);

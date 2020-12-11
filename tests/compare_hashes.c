@@ -21,12 +21,12 @@ uint64_t calc_hash_jen(void *hash_info, unsigned char *str, unsigned length) {
 /* Bit-balanced Table hash */
 #include "hash_bbt.h"
 #define BBT_HASH_TABLE bbt_table_3
-extern struct bbt_hash_table BBT_HASH_TABLE;
+extern struct bbt_hash_params BBT_HASH_TABLE;
 
 uint64_t calc_hash_bbt(void *hash_info, unsigned char *str, unsigned length) {
 	bbt_hash_ctxt *ctxt = (bbt_hash_ctxt*)hash_info;
 	uint64_t hash;
-	bbt_hash_add(ctxt, str, length);
+	bbt_hash_calc(ctxt, str, length);
 	hash = BBT_HASH_GET(ctxt);
 	bbt_hash_reset(ctxt);
 	return hash;

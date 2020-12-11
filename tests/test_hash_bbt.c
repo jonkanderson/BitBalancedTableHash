@@ -11,7 +11,7 @@
 #include "hash_bbt.h"
 
 #define HASH_TABLE bbt_table_1
-extern struct bbt_hash_table HASH_TABLE;
+extern struct bbt_hash_params HASH_TABLE;
 
 #define STR_BUFFER_SZ 512
 
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 	bbt_hash_init(&hc, &(HASH_TABLE));
 
 	while (fgets(b, STR_BUFFER_SZ-1, stdin)) {
-		bbt_hash_add(&hc, (unsigned char *)b, strlen(b));
+		bbt_hash_calc(&hc, (unsigned char *)b, strlen(b));
 		h.value = BBT_HASH_GET(&hc);
 		for (int i=0; i<4; i++) {
 			fputc(h.bytes.x[i], f[i]);

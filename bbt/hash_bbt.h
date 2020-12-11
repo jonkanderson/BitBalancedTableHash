@@ -13,17 +13,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #include <stdint.h>
 
-// If you change the bits, be sure to change BBT_HASH_WIDTH in the Makefile.
+#ifndef BBT_HASH_WIDTH
 #define BBT_HASH_WIDTH 64
+#endif
 
 #if BBT_HASH_WIDTH == 64
    typedef uint64_t bbt_hash_t;
-#else
-#  define BBT_HASH_WIDTH 32
+#elif BBT_HASH_WIDTH == 32
    typedef uint32_t bbt_hash_t;
+#else
+#error "BBT_HASH_WIDTH is not defined."
 #endif
 
-struct bbt_hash_table {
+struct bbt_hash_params {
 	bbt_hash_t methodMask1;
 	bbt_hash_t methodMask2;
 	bbt_hash_t size;
@@ -31,16 +33,16 @@ struct bbt_hash_table {
 };
 
 typedef struct bbt_hash_ctxt {
-	struct bbt_hash_table *table;
+	struct bbt_hash_params *table;
 	bbt_hash_t pos;
 	bbt_hash_t hash;
 } bbt_hash_ctxt;
 
 #define BBT_HASH_GET(C) ((C)->hash)
 
-void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_table *ht);
+void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_params *ht);
 void bbt_hash_reset(bbt_hash_ctxt *ctxt);
-void bbt_hash_add(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz);
+void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz);
 
 #endif
 

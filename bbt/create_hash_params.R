@@ -1,6 +1,6 @@
 # This program produces random numbers that have the same number of 0s as 1s in binary.
 # Example:
-#   mkdir -p ../out ; R -f hash_table.R --args ../out/hash_table.c bbt_table 17 ; cat ../out/hash_table.c
+#   mkdir -p ../out ; R -f create_hash_params.R --args ../out/hash_table.c bbt_table 17 ; cat ../out/hash_table.c
 
 args = commandArgs(trailingOnly=T)
 print(args)
@@ -36,7 +36,7 @@ outLiteralNum <- function(bitList) {
 }
 
 cat(file=out, "#include \"hash_bbt.h\"\n")
-cat(file=out, "struct bbt_hash_table ")
+cat(file=out, "struct bbt_hash_params ")
 cat(file=out, varname)
 cat(file=out, " = {\n")
 
