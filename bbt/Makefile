@@ -8,7 +8,7 @@ include settings.mk
 
 $(OUT_DIR)/hash_bbt.o: hash_bbt.c hash_bbt.h
 	mkdir -p $(OUT_DIR)
-	$(CC) -c -o $@ $< -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH)
+	$(CC) -c -fPIC -o $@ $< -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH)
 
 $(OUT_DIR)/hash_tables.c: create_hash_params.R
 	mkdir -p $(OUT_DIR)
