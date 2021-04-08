@@ -1,3 +1,5 @@
+# TODO: This Makefile needs to be re-worked.
+
 OUT_DIR=../out
 CC=/usr/bin/clang
 
@@ -150,3 +152,14 @@ test6_leaks: $(OUT_DIR)/compare_hashes
 	$(TEST_HASH_CMD) | head -n 500 | valgrind \
 		--leak-check=full --track-origins=yes --show-error-list=yes \
 		$<
+
+#--------------------------------------
+test_hin: $(OUT_DIR)/hin
+	cat /usr/share/dict/words | $(OUT_DIR)/hin
+
+$(OUT_DIR)/hin: hash_stdin.c $(OUT_DIR)/hash_tables.o $(OUT_DIR)/hash_bbt.o
+	mkdir -p $(OUT_DIR)
+	$(CC) -o $@ $< -I ../bbt \
+		$(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_tables.o -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH)
+	@echo ">>> $@"
+
