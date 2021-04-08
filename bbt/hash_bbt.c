@@ -26,11 +26,13 @@ void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_params *ht) {
 	ctxt->table = ht;
 	ctxt->pos = 0;
 	ctxt->hash = 0;
+	ctxt->inputSize = 0;
 }
 
 void bbt_hash_reset(bbt_hash_ctxt *ctxt) {
 	ctxt->pos = 0;
 	ctxt->hash = 0;
+	ctxt->inputSize = 0;
 }
 
 typedef union {
@@ -53,7 +55,7 @@ typedef union {
 		unsigned char advance : 3;
 		unsigned char shift4 : 4;
 	} m4;
-	unsigned char value;	
+	unsigned char value;
 } mh_bit_select;
 
 #define GET_METHOD(ATTR) (((ctxt->hash & table->ATTR)==0)?0:1)
@@ -67,19 +69,20 @@ void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz)
 	if (input_sz == 0) return;
 
 	unsigned char *p = input;
-	for (unsigned i=0; i<input_sz; i++, p++) {
+	unsigned ix = ctxt->inputSize;
+	for (unsigned i=0; i<input_sz; i++, p++, ix++) {
 		//bsel.value = *p;
 		// The variation below modifies the command byte using an independent data source, i*i.
-		bsel.value = (*p) ^ ((i*i) ^ 0xFF);
+		bsel.value = (*p) ^ ((ix*ix) ^ 0xFF);
 
 		/* I have tried various configurations of extracting advance
 		 * and shift.  All four of these seem to work similarly. The 
 		 * version I settled on is to use modulo and do a round-robin on 
-		 * each. (i%4)
+		 * each. (ix%4)
 		 */
 		//switch(1) {
 		//switch(GET_METHOD(methodMask1)*2 + GET_METHOD(methodMask2)) {
-		switch(i%4) {
+		switch(ix%4) {
 		case 0:
 			advance = bsel.m1.advance;
 			shift = bsel.m1.shift;
@@ -106,5 +109,6 @@ void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz)
 			ctxt->hash ^= buffer;
 		}
 	}
+	ctxt->inputSize += input_sz;
 }
 

@@ -28,14 +28,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 struct bbt_hash_params {
 	bbt_hash_t methodMask1;
 	bbt_hash_t methodMask2;
-	bbt_hash_t size;
+	unsigned size;
 	bbt_hash_t *patterns;
 };
 
 typedef struct bbt_hash_ctxt {
 	struct bbt_hash_params *table;
-	bbt_hash_t pos;
+	unsigned pos;
 	bbt_hash_t hash;
+	unsigned inputSize;
 } bbt_hash_ctxt;
 
 #define BBT_HASH_GET(C) ((C)->hash)

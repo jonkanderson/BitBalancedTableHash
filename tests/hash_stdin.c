@@ -13,6 +13,8 @@
 extern struct bbt_hash_params HASH_TABLE;
 
 int main(int argc, char **argv) {
+	// This offset is used to test that two calls to bbt_hash_calc give the same as one.
+	const unsigned offset = 3;
 
 	bbt_hash_t hBbt;
 	bbt_hash_ctxt hc;
@@ -30,7 +32,12 @@ int main(int argc, char **argv) {
 		if (sz > 0 && strBuf[sz-1] == '\n') {
 			strBuf[--sz] = '\0';
 		}
-		bbt_hash_calc(&hc, (unsigned char *)strBuf, sz);
+		if (sz > offset) {
+			bbt_hash_calc(&hc, (unsigned char *)strBuf, offset);
+			bbt_hash_calc(&hc, (unsigned char *)(strBuf+offset), sz-offset);
+		} else {
+			bbt_hash_calc(&hc, (unsigned char *)strBuf, sz);
+		}
 		bbt_hash_calc(&hc_all, (unsigned char *)strBuf, sz);
 		hBbt = BBT_HASH_GET(&hc);
 		printf("%lu \"%s\"\n", hBbt, strBuf);
