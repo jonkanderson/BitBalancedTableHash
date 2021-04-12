@@ -26,17 +26,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #endif
 
 struct bbt_hash_params {
-	bbt_hash_t methodMask1;
-	bbt_hash_t methodMask2;
-	unsigned size;
+	unsigned patternTabSize;
 	bbt_hash_t *patterns;
+	unsigned shiftTabSize;
+	bbt_hash_t *shifts;
 };
 
 typedef struct bbt_hash_ctxt {
-	struct bbt_hash_params *table;
-	unsigned pos;
+	struct bbt_hash_params *params;
 	bbt_hash_t hash;
+	bbt_hash_t shiftSource;
 	unsigned inputSize;
+	unsigned patternsPos;
+	unsigned shiftsPos;
 } bbt_hash_ctxt;
 
 #define BBT_HASH_GET(C) ((C)->hash)

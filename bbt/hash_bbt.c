@@ -17,98 +17,71 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * The point is that the actual input data itself is never added into the hash 
  * directly because my hypothesis is that any subtle pattern in the input 
  * will degrade the entropy.  The process is very simple and fairly fast.  
- * New hashing tables are easy to generate.
+ * New hashing parameters are easy to generate.
  */
 
 #include "hash_bbt.h"
 
-void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_params *ht) {
-	ctxt->table = ht;
-	ctxt->pos = 0;
+void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_params *params) {
+	ctxt->params = params;
 	ctxt->hash = 0;
+	ctxt->shiftSource = params->shifts[0];
 	ctxt->inputSize = 0;
+	ctxt->patternsPos = 0;
+	ctxt->shiftsPos = 0;
 }
 
 void bbt_hash_reset(bbt_hash_ctxt *ctxt) {
-	ctxt->pos = 0;
 	ctxt->hash = 0;
+	ctxt->shiftSource = ctxt->params->shifts[0];
 	ctxt->inputSize = 0;
+	ctxt->patternsPos = 0;
+	ctxt->shiftsPos = 0;
 }
 
-typedef union {
-	struct {
-		unsigned char advance : 3;
-		unsigned char shift : 5;
-	} m1;
-	struct {
-		unsigned char advance1 : 1;
-		unsigned char shift : 5;
-		unsigned char advance2 : 2;
-	} m2;
-	struct {
-		unsigned char shift2 : 2;
-		unsigned char advance : 3;
-		unsigned char shift3 : 3;
-	} m3;
-	struct {
-		unsigned char shift1 : 1;
-		unsigned char advance : 3;
-		unsigned char shift4 : 4;
-	} m4;
-	unsigned char value;
-} mh_bit_select;
-
-#define GET_METHOD(ATTR) (((ctxt->hash & table->ATTR)==0)?0:1)
+// BIT_ROTATE moves SHIFT bits from the high end to low.
+#define BIT_ROTATE(HASH,SHIFT) ((bbt_hash_t)((HASH)<<(SHIFT)) | (bbt_hash_t)((HASH)>>(BBT_HASH_WIDTH - (SHIFT))))
 
 void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz) {
-	mh_bit_select bsel;
-	unsigned int shift, advance;
+	unsigned int ssShift, ssAdvance;
+	unsigned int hShift, hAdvance;
 	bbt_hash_t buffer;
-	struct bbt_hash_params *table = ctxt->table;
-	
+	struct bbt_hash_params *params = ctxt->params;
+
 	if (input_sz == 0) return;
 
-	unsigned char *p = input;
-	unsigned ix = ctxt->inputSize;
-	for (unsigned i=0; i<input_sz; i++, p++, ix++) {
-		//bsel.value = *p;
-		// The variation below modifies the command byte using an independent data source, i*i.
-		bsel.value = (*p) ^ ((ix*ix) ^ 0xFF);
-
-		/* I have tried various configurations of extracting advance
-		 * and shift.  All four of these seem to work similarly. The 
-		 * version I settled on is to use modulo and do a round-robin on 
-		 * each. (ix%4)
-		 */
-		//switch(1) {
-		//switch(GET_METHOD(methodMask1)*2 + GET_METHOD(methodMask2)) {
-		switch(ix%4) {
-		case 0:
-			advance = bsel.m1.advance;
-			shift = bsel.m1.shift;
-			break;
-		case 1:
-			advance = (bsel.m2.advance2<<1) + bsel.m2.advance1;
-			shift = bsel.m2.shift;
-			break;
-		case 2:
-			advance = bsel.m3.advance;
-			shift = (bsel.m3.shift2<<3) + bsel.m3.shift3;
-			break;
-		case 3:
-			advance = bsel.m4.advance;
-			shift = (bsel.m4.shift4<<1) + bsel.m4.shift1;
-		}
-
-		ctxt->pos = (ctxt->pos+advance+1) % table->size;
-		buffer = table->patterns[ctxt->pos];
-		if (shift == 0) {
-			ctxt->hash ^= buffer;
-		} else {
-			buffer = (bbt_hash_t)(buffer<<shift) | (bbt_hash_t)(buffer>>(BBT_HASH_WIDTH-shift));
-			ctxt->hash ^= buffer;
-		}
-	}
 	ctxt->inputSize += input_sz;
+
+	unsigned char *inputPtr = input;
+	for (unsigned i=0; i<input_sz; i++, inputPtr++) {
+
+		// Get hShift and hAdvance from the current shiftSource.
+		hShift = ctxt->shiftSource & 0x1F;
+		hAdvance = ((ctxt->shiftSource >> 5) & 0xFF) + 1;
+		ctxt->shiftSource = BIT_ROTATE(ctxt->shiftSource, 8);
+
+		// Calculate the next value on the hash using the pattern.
+		ctxt->patternsPos = (ctxt->patternsPos + hAdvance) % params->patternTabSize;
+		buffer = params->patterns[ctxt->patternsPos];
+		if (hShift > 0) {
+			buffer = BIT_ROTATE(buffer, hShift);
+		}
+		ctxt->hash ^= buffer;
+
+		// Get ssShift and ssAdvance.  Input only influences the way that shiftSource changes.
+		buffer = ctxt->shiftSource ^ ((bbt_hash_t)*inputPtr);
+		ssShift = (buffer & 0x1F);
+		buffer = (ctxt->shiftSource >> 6) ^ ((bbt_hash_t)*inputPtr);
+		ssAdvance = (buffer & 0xFF) + 1;
+		ctxt->shiftSource = BIT_ROTATE(ctxt->shiftSource, 8);
+
+		// Prepare shiftSource for the next iteration using the shifts pattern.
+		buffer= params->shifts[ctxt->shiftsPos];
+		if (ssShift > 0) {
+			buffer = BIT_ROTATE(buffer, ssShift);
+		}
+		ctxt->shiftSource ^= buffer;
+		ctxt->shiftsPos = (ctxt->shiftsPos + ssAdvance) % params->shiftTabSize;
+	}
 }
 

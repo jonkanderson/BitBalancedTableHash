@@ -11,8 +11,9 @@ if (length(args) == 0) {
 
 out <- file(args[1], "w")
 varname <- args[2]
-count <- as.numeric(args[3])
-bits <- as.numeric(args[4])
+patternTabCount <- as.numeric(args[3])
+shiftTabCount <- as.numeric(args[4])
+bits <- as.numeric(args[5])
 
 halfbits <- floor(bits/2)
 hexDigits <- c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F")
@@ -35,48 +36,36 @@ outLiteralNum <- function(bitList) {
 	}
 }
 
+exportList <- function(name, count) {
+	numsWritten <- 0
+	cat(file=out, "  .")
+	cat(file=out, name)
+	cat(file=out, " = (bbt_hash_t[]){\n")
+	while (numsWritten < count) {
+		cat(file=out, "    ")
+		cat(file=out, outLiteralNum(sample(1:bits, size=halfbits)))
+		cat(file=out, ", //NOLINT\n")
+		numsWritten <- numsWritten + 1
+	}
+	cat(file=out, "  }")
+}
+
 cat(file=out, "#include \"hash_bbt.h\"\n")
 cat(file=out, "struct bbt_hash_params ")
 cat(file=out, varname)
 cat(file=out, " = {\n")
 
-m <- 
-cat(file=out, "  .methodMask1 = ")
-cat(file=out, outLiteralNum(sample(1:bits, size=1)))
-cat(file=out, ",\n")
-cat(file=out, "  .methodMask2 = ")
-cat(file=out, outLiteralNum(sample(1:bits, size=1)))
+cat(file=out, "  .patternTabSize = ")
+cat(file=out, patternTabCount)
+cat(file=out, ", //NOLINT\n")
+exportList("patterns", patternTabCount)
 cat(file=out, ",\n")
 
-cat(file=out, "  .size = ")
-cat(file=out, count)
-cat(file=out, ",\n")
+cat(file=out, "  .shiftTabSize = ")
+cat(file=out, shiftTabCount)
+cat(file=out, ", //NOLINT\n")
+exportList("shifts", shiftTabCount)
 
-numsWritten <- 0
-cat(file=out, "  .patterns = (bbt_hash_t[]){\n")
-while (numsWritten < count) {
-	cat(file=out, "    ")
-	cat(file=out, outLiteralNum(sample(1:bits, size=halfbits)))
-	cat(file=out, ",\n")
-	numsWritten <- numsWritten + 1
-
-# I lose entropy when I don't make the bits exactly even!
-
-#	if (numsWritten < count) {
-#		cat(file=out, "    ")
-#		cat(file=out, outLiteralNum(sample(1:bits, size=halfbits-1)))
-#		cat(file=out, ",\n")
-#		numsWritten <- numsWritten + 1
-#	}
-#
-#	if (numsWritten < count) {
-#		cat(file=out, "    ")
-#		cat(file=out, outLiteralNum(sample(1:bits, size=halfbits+1)))
-#		cat(file=out, ",\n")
-#		numsWritten <- numsWritten + 1
-#	}
-}
-cat(file=out, "  }\n")
 cat(file=out, "};\n")
 
 cat(file=out, "\n\n")
