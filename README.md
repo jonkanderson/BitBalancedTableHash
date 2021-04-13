@@ -4,7 +4,7 @@ This is an implementation of a non-cryptographic hashing function. The function 
 
 ## Prerequisites
 
-This code was developed on Debian Linux.  It requires [R](https://en.wikipedia.org/wiki/R_(programming_language)) for generating a bitstring table.  It also requires the [GSL](https://en.wikipedia.org/wiki/GNU_Scientific_Library) C library for running tests using a logarithm function. The file `/usr/share/dict/words` is one source of input used in the tests.
+This code was developed on Debian Linux.  It requires the [GSL](https://en.wikipedia.org/wiki/GNU_Scientific_Library) C library for running tests using a logarithm function and for random generation of hash parameters. The file `/usr/share/dict/words` is one source of input used in the tests.
 
 ## Build
 

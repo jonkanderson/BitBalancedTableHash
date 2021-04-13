@@ -5,6 +5,4 @@
 	- Deterministic tests -- based on saved params
 	- Deterministic test results -- for regression / unit testing
 	- Non-deterministic tests on both saved params and newly generated params.
-- Generate `bbt_hash_params` instance from C using the GSL.
-	- Use Mersenne Twister `gsl_rng_alloc(gsl_rng_mt19937)` and `gsl_rng_get(rng)`
-	- Generate C text from C as well.
+- Create a test that uses this hashing as if it were a random number generator and test its entropy.

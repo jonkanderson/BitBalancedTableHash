@@ -8,44 +8,20 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef HASH_BBT_H
-#define HASH_BBT_H
+#ifndef HASH_BBT_GEN_H
+#define HASH_BBT_GEN_H
 
-#include <stdint.h>
+#include "hash_bbt.h"
 
-#ifndef BBT_HASH_WIDTH
-#define BBT_HASH_WIDTH 64
-#endif
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
-#if BBT_HASH_WIDTH == 64
-   typedef uint64_t bbt_hash_t;
-#elif BBT_HASH_WIDTH == 32
-   typedef uint32_t bbt_hash_t;
-#else
-#error "BBT_HASH_WIDTH is not defined."
-#endif
+#include <stdio.h>
+#include <stdlib.h>
 
-struct bbt_hash_params {
-	unsigned patternTabSize;
-	bbt_hash_t *patterns;
-	unsigned shiftTabSize;
-	bbt_hash_t *shifts;
-};
-
-typedef struct bbt_hash_ctxt {
-	struct bbt_hash_params *params;
-	bbt_hash_t hash;
-	bbt_hash_t shiftSource;
-	unsigned inputSize;
-	unsigned patternsPos;
-	unsigned shiftsPos;
-} bbt_hash_ctxt;
-
-#define BBT_HASH_GET(C) ((C)->hash)
-
-void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_params *params);
-void bbt_hash_reset(bbt_hash_ctxt *ctxt);
-void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz);
+struct bbt_hash_params *bbt_hash_create_params(unsigned patternTabCount, unsigned shiftTabCount, unsigned seed);
+void bbt_write_params(FILE *outStream, struct bbt_hash_params *params, char *varname);
+void bbt_hash_free_params(struct bbt_hash_params *params);
 
 #endif
 
