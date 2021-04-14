@@ -8,22 +8,6 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/*
-Example use: ../out/create_hash_params bbt_table 37 13 64 > ../out/hash_table.c ; cat ../out/hash_table.c
-
-varname <- args[2]
-patternTabSize <- as.numeric(args[3])
-shiftTabSize <- as.numeric(args[4])
-bits <- as.numeric(args[5])
-
-unsigned long int strtoul(const char *nptr, char **endptr, int base);
-
-If  endptr is not NULL, strtoul() stores the address of the first invalid character in *endptr.  If there were
-no digits at all, strtoul() stores the original value of nptr in *endptr (and returns 0).  In  particular,  if
-*nptr is not '\0' but **endptr is '\0' on return, the entire string is valid.
-
-*/
-
 #include "hash_bbt_gen.h"
 
 #include "string.h"

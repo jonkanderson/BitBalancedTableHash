@@ -163,3 +163,10 @@ $(OUT_DIR)/hin: hash_stdin.c $(OUT_DIR)/hash_tables.o $(OUT_DIR)/hash_bbt.o
 		$(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_tables.o -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH)
 	@echo ">>> $@"
 
+#--------------------------------------
+$(OUT_DIR)/test_rng : $(OUT_DIR)/% : %.c $(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_tables.o
+	$(CC) -g -o $@ -I . -I ../bbt $^ -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH)
+
+run_test_rng: $(OUT_DIR)/test_rng
+	X=$$(tempfile) ; echo $$X ;  $< 10485760 Blals5drush+ > $$X ; /usr/bin/ent $$X #; rm $$X
+	#X=$$(tempfile) ; echo $$X ;  $< 104857600 lier8Zeas > $$X ; /usr/bin/ent $$X ; rm $$X
