@@ -5,7 +5,7 @@
  * iteration the contexts switch roles.
  */
 
-#include "hash_bbt.h"
+#include "hash_bbt_rng.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -16,22 +16,6 @@
 
 extern struct bbt_hash_params PARAMS_1;
 extern struct bbt_hash_params PARAMS_2;
-
-unsigned char getNext(bbt_hash_ctxt *ctxtThis, bbt_hash_ctxt *ctxtOther) {
-	bbt_hash_t num = BBT_HASH_GET(ctxtThis);
-	unsigned char outByte = num & 0xFF;
-	num = num >> 8;
-
-	unsigned char buffer[sizeof(bbt_hash_t)];
-	unsigned char *p = buffer;
-	for (unsigned i=0; i < sizeof(bbt_hash_t)-1; i++, p++) {
-		*p = num & 0xFF;
-		num = num >> 8;
-	}
-	bbt_hash_calc(ctxtOther, buffer, sizeof(bbt_hash_t)-1);
-
-	return outByte;
-}
 
 int main(int argc, char *argv[]) {
 	unsigned long int ouputLength;
@@ -52,22 +36,20 @@ int main(int argc, char *argv[]) {
 
 	randomString = (unsigned char *)argv[argPos++];
 
-	bbt_hash_ctxt hcA;
-	bbt_hash_ctxt hcB;
+	bbt_rng_ctxt rng;
 
-	bbt_hash_init(&hcA, &PARAMS_1);
-	bbt_hash_init(&hcB, &PARAMS_2);
+	// Initialize the rng using a phrase that will be hashed.
+	bbt_rng_init(&rng, &PARAMS_1, &PARAMS_2, 0);
+	bbt_rng_phrase(&rng, randomString, strlen((char*)randomString));
 
-	bbt_hash_calc(&hcA, randomString, strlen((char*)randomString));
+	// Alternate initialization is to use a number that provides the initial hash value.
+	// bbt_rng_init(&rng, &PARAMS_1, &PARAMS_2, 53086951135934ul);
 
-	int useA = 1;
 	for(unsigned long int i=0; i < ouputLength; i++) {
-		if (useA == 1) {
-			fputc(getNext(&hcA, &hcB), stdout);
-			useA = 0;
-		} else {
-			fputc(getNext(&hcB, &hcA), stdout);
-			useA = 1;
+		bbt_hash_t temp = bbt_rng_next(&rng);
+		for (unsigned j = 0; j < sizeof(bbt_hash_t); j++) {
+			fputc(temp & 0xFF, stdout);
+			temp = temp >> 8;
 		}
 	}
 

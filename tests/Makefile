@@ -55,6 +55,9 @@ $(OUT_DIR)/hash_jen.o: hash_jen.c
 $(OUT_DIR)/hash_bbt.o:
 	$(MAKE) -C ../bbt $@
 
+$(OUT_DIR)/hash_bbt_rng.o:
+	$(MAKE) -C ../bbt $@
+
 $(OUT_DIR)/hash_tables.o:
 	$(MAKE) -C ../bbt $@
 
@@ -150,7 +153,7 @@ test6_compare_one_char: $(OUT_DIR)/compare_hashes_one_char
 
 test6_leaks: $(OUT_DIR)/compare_hashes
 	$(TEST_HASH_CMD) | head -n 500 | valgrind \
-		--leak-check=full --track-origins=yes --show-error-list=yes \
+		--leak-check=full --track-origins=yes \
 		$<
 
 #--------------------------------------
@@ -164,9 +167,8 @@ $(OUT_DIR)/hin: hash_stdin.c $(OUT_DIR)/hash_tables.o $(OUT_DIR)/hash_bbt.o
 	@echo ">>> $@"
 
 #--------------------------------------
-$(OUT_DIR)/test_rng : $(OUT_DIR)/% : %.c $(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_tables.o
+$(OUT_DIR)/test_rng : $(OUT_DIR)/% : %.c $(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_bbt_rng.o $(OUT_DIR)/hash_tables.o
 	$(CC) -g -o $@ -I . -I ../bbt $^ -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH)
 
 run_test_rng: $(OUT_DIR)/test_rng
-	X=$$(tempfile) ; echo $$X ;  $< 10485760 Blals5drush+ > $$X ; /usr/bin/ent $$X #; rm $$X
-	#X=$$(tempfile) ; echo $$X ;  $< 104857600 lier8Zeas > $$X ; /usr/bin/ent $$X ; rm $$X
+	X=$$(tempfile) ; $< 10485760 Blals5drush+ > $$X ; /usr/bin/ent $$X ; echo "Random data file: $$X"
