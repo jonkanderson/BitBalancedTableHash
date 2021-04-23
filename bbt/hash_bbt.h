@@ -41,11 +41,25 @@ typedef struct bbt_hash_ctxt {
 	unsigned shiftsPos;
 } bbt_hash_ctxt;
 
+/*
+ * Usage notes:
+ *   bbt_hash_init = Initializes a hash context that has been pre-allocated. 
+ *   bbt_hash_reset = Re-initializes a hash context using the same parameters. 
+ *   bbt_hash_calc = Consumes input into the hash.  This can be called multiple times 
+ *      to add more input into the hash.
+ *   BBT_HASH_GET = Macro to get the current hash attribute.  This may not include 
+ *      the most recent input.
+ *   bbt_hash_getHash = Pushes zeros into a copy of the machine to utilize the rest of the 
+ *      input.  Original state is unchanged. Also, as a special case, the empty string always 
+ *      returns a hash value of 0.
+ */
+
 #define BBT_HASH_GET(C) ((C)->hash)
 
 void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_params *params);
 void bbt_hash_reset(bbt_hash_ctxt *ctxt);
 void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz);
+bbt_hash_t bbt_hash_getHash(bbt_hash_ctxt *ctxt);
 
 #endif
 

@@ -27,7 +27,7 @@ uint64_t calc_hash_bbt(void *hash_info, unsigned char *str, unsigned length) {
 	bbt_hash_ctxt *ctxt = (bbt_hash_ctxt*)hash_info;
 	uint64_t hash;
 	bbt_hash_calc(ctxt, str, length);
-	hash = BBT_HASH_GET(ctxt);
+	hash = bbt_hash_getHash(ctxt);
 	bbt_hash_reset(ctxt);
 	return hash;
 }

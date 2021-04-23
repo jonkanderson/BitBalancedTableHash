@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 
 	while (fgets(b, STR_BUFFER_SZ-1, stdin)) {
 		bbt_hash_calc(&hc, (unsigned char *)b, strlen(b));
-		h.value = BBT_HASH_GET(&hc);
+		h.value = bbt_hash_getHash(&hc);
 		for (int i=0; i<4; i++) {
 			fputc(h.bytes.x[i], f[i]);
 			fputc(h.bytes.x[i], f[4]);

@@ -22,6 +22,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #include "hash_bbt.h"
 
+#include <string.h>
+
 void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_params *params) {
 	ctxt->params = params;
 	ctxt->hash = 0;
@@ -83,5 +85,14 @@ void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz)
 		ctxt->shiftSource ^= buffer;
 		ctxt->shiftsPos = (ctxt->shiftsPos + ssAdvance) % params->shiftTabSize;
 	}
+}
+
+bbt_hash_t bbt_hash_getHash(bbt_hash_ctxt *ctxt) {
+	if (ctxt->inputSize == 0) { return 0; }
+	bbt_hash_t retValue;
+	bbt_hash_ctxt tempCtxt;
+	memcpy(&tempCtxt, ctxt, sizeof(bbt_hash_ctxt));
+	bbt_hash_calc(&tempCtxt, (unsigned char[sizeof(bbt_hash_ctxt)]){}, sizeof(bbt_hash_ctxt));
+	return BBT_HASH_GET(&tempCtxt);
 }
 

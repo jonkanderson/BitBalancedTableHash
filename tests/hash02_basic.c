@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 		printf("J: %u \"%s\"\n", hJen, s);
 
 		bbt_hash_calc(&hc, (unsigned char *)s, strlen(s));
-		hBbt = BBT_HASH_GET(&hc);
+		hBbt = bbt_hash_getHash(&hc);
 		printf("M: %lu \"%s\"\n", hBbt, s);
 		bbt_hash_reset(&hc);
 	}

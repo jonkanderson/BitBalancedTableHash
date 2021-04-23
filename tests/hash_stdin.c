@@ -39,11 +39,11 @@ int main(int argc, char **argv) {
 			bbt_hash_calc(&hc, (unsigned char *)strBuf, sz);
 		}
 		bbt_hash_calc(&hc_all, (unsigned char *)strBuf, sz);
-		hBbt = BBT_HASH_GET(&hc);
+		hBbt = bbt_hash_getHash(&hc);
 		printf("%lu \"%s\"\n", hBbt, strBuf);
 		bbt_hash_reset(&hc);
 	}
-	hBbt = BBT_HASH_GET(&hc_all);
+	hBbt = bbt_hash_getHash(&hc_all);
 	printf("%lu ALL\n", hBbt);
 
 	return 0;
