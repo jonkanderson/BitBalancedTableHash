@@ -167,8 +167,33 @@ $(OUT_DIR)/hin: hash_stdin.c $(OUT_DIR)/hash_tables.o $(OUT_DIR)/hash_bbt.o
 	@echo ">>> $@"
 
 #--------------------------------------
+TEMPFILE_CMD=tempfile -d /tmp -p file_rand -s .dat
+
 $(OUT_DIR)/test_rng : $(OUT_DIR)/% : %.c $(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_bbt_rng.o $(OUT_DIR)/hash_tables.o
 	$(CC) -g -o $@ -I . -I ../bbt $^ -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH)
 
 run_test_rng: $(OUT_DIR)/test_rng
-	X=$$(tempfile) ; $< 10485760 Blals5drush+ > $$X ; /usr/bin/ent $$X ; echo "Random data file: $$X"
+	X=$$($(TEMPFILE_CMD)) ; $< 10485760 Blals5drush+ > $$X ; /usr/bin/ent $$X ; echo "Random data file: $$X"
+
+#--------------------------------------
+RANDNUM_CMD=cat /dev/urandom | dd ibs=1 count=4 skip=20 2>/dev/null | od -tu4 | cut -b 9-
+
+TEST7_DEPS= \
+	$(OUT_DIR)/hash_bbt.o \
+	$(OUT_DIR)/hash_tables.o
+
+$(OUT_DIR)/test7_oneBit: test7_oneBit.c $(TEST7_DEPS)
+	mkdir -p $(OUT_DIR)
+	$(CC) -g -o $@ -I $(OUT_DIR) -I ../bbt $^ -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH) -lgsl -lgslcblas
+
+TEST7_FILE_SZ=1048576
+
+run_test7_oneBit: $(OUT_DIR)/test7_oneBit
+	for BIT_POS in $$(seq 0 32) ; do \
+		FILE=$$($(TEMPFILE_CMD)) ; \
+		SEED=$$($(RANDNUM_CMD)) ; \
+		echo "Seed: $$SEED" ; \
+		$< "$$FILE" $$BIT_POS $(TEST7_FILE_SZ) $$SEED ; \
+		/usr/bin/ent "$$FILE" ; \
+		rm "$$FILE" ; \
+		done
