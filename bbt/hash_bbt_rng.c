@@ -16,6 +16,12 @@ void bbt_rng_init(bbt_rng_ctxt *rng, struct bbt_hash_params *paramsA, struct bbt
 	rng->ctxtA.hash = initialHash;
 }
 
+void bbt_rng_reset(bbt_rng_ctxt *rng, bbt_hash_t initialHash) {
+	bbt_hash_reset(&rng->ctxtA);
+	bbt_hash_reset(&rng->ctxtB);
+	rng->ctxtA.hash = initialHash;
+}
+
 void bbt_rng_phrase(bbt_rng_ctxt *rng, unsigned char *input, unsigned input_sz){
 	bbt_hash_calc(&rng->ctxtA, input, input_sz);
 }
@@ -23,16 +29,13 @@ void bbt_rng_phrase(bbt_rng_ctxt *rng, unsigned char *input, unsigned input_sz){
 // The function bbtrng_getNext is only called by bbt_rng_next.
 bbt_hash_t bbtrng_getNext(bbt_hash_ctxt *ctxtThis, bbt_hash_ctxt *ctxtOther) {
 	bbt_hash_t num = BBT_HASH_GET(ctxtThis);
-	unsigned char outByte = num & 0xFF;
-	num = num >> 8;
-
 	unsigned char buffer[sizeof(bbt_hash_t)];
 	unsigned char *p = buffer;
-	for (unsigned i=0; i < sizeof(bbt_hash_t)-1; i++, p++) {
+	for (unsigned i=0; i < sizeof(bbt_hash_t); i++, p++) {
 		*p = num & 0xFF;
 		num = num >> 8;
 	}
-	bbt_hash_calc(ctxtOther, buffer, sizeof(bbt_hash_t)-1);
+	bbt_hash_calc(ctxtOther, buffer, sizeof(bbt_hash_t));
 	return BBT_HASH_GET(ctxtOther);
 }
 
