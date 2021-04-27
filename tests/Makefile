@@ -197,3 +197,20 @@ run_test7_oneBit: $(OUT_DIR)/test7_oneBit
 		/usr/bin/ent "$$FILE" ; \
 		rm "$$FILE" ; \
 		done
+
+#--------------------------------------
+TEST8_DEPS= \
+	$(OUT_DIR)/hash_bbt.o \
+	$(OUT_DIR)/hash_tables.o
+
+$(OUT_DIR)/test8_bitCascade: test8_bitCascade.c $(TEST8_DEPS)
+	mkdir -p $(OUT_DIR)
+	$(CC) -g -o $@ -I $(OUT_DIR) -I ../bbt $^ -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH) -lgsl -lgslcblas
+
+run_test8_bitCascade: $(OUT_DIR)/test8_bitCascade
+	SEED=$$($(RANDNUM_CMD)) ; \
+		echo "Seed: $$SEED" ; \
+		BIT_POS=10 ; \
+		$< $$BIT_POS $$SEED > /tmp/out.R
+	R -q -e 'source("/tmp/out.R")'
+
