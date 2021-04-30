@@ -81,38 +81,38 @@ void bbtgen_writeTable(FILE *outStream, char *name, bbt_hash_t *table, unsigned 
 
 // *** API Functions
 
-struct bbt_hash_params *bbt_hash_create_params(unsigned patternTabSize, unsigned shiftTabSize, unsigned seed) {
+struct bbt_hash_patterns *bbt_hash_create_patterns(unsigned hashPatternsSize, unsigned commandPatternsSize, unsigned seed) {
 	gsl_rng *rng = gsl_rng_alloc(gsl_rng_mt19937); /* Mersenne Twister */
 	gsl_rng_set(rng, seed);
 
-	struct bbt_hash_params *params = (struct bbt_hash_params *)malloc(sizeof(struct bbt_hash_params));
-	params->patternTabSize = patternTabSize,
-	params->patterns = (bbt_hash_t*)malloc(patternTabSize * sizeof(bbt_hash_t));
-	params->shiftTabSize = shiftTabSize,
-	params->shifts = (bbt_hash_t*)malloc(shiftTabSize * sizeof(bbt_hash_t));
+	struct bbt_hash_patterns *patterns = (struct bbt_hash_patterns *)malloc(sizeof(struct bbt_hash_patterns));
+	patterns->hashPatternsSize = hashPatternsSize,
+	patterns->hashPatterns = (bbt_hash_t*)malloc(hashPatternsSize * sizeof(bbt_hash_t));
+	patterns->commandPatternsSize = commandPatternsSize,
+	patterns->commandPatterns = (bbt_hash_t*)malloc(commandPatternsSize * sizeof(bbt_hash_t));
 
-	bbtgen_fillTable(rng, params->patterns, patternTabSize);
-	bbtgen_fillTable(rng, params->shifts, shiftTabSize);
+	bbtgen_fillTable(rng, patterns->hashPatterns, hashPatternsSize);
+	bbtgen_fillTable(rng, patterns->commandPatterns, commandPatternsSize);
 
 	gsl_rng_free(rng);
-	return params;
+	return patterns;
 }
 
-void bbt_write_params(FILE *outStream, struct bbt_hash_params *params, char *varname) {
-	fprintf(outStream, "struct bbt_hash_params %s = {\n", varname);
+void bbt_write_patterns(FILE *outStream, struct bbt_hash_patterns *patterns, char *varname) {
+	fprintf(outStream, "struct bbt_hash_patterns %s = {\n", varname);
 
-	fprintf(outStream, "  .patternTabSize = %u, //NOLINT\n", params->patternTabSize);
-	bbtgen_writeTable(outStream, "patterns", params->patterns, params->patternTabSize);
+	fprintf(outStream, "  .hashPatternsSize = %u, //NOLINT\n", patterns->hashPatternsSize);
+	bbtgen_writeTable(outStream, "hashPatterns", patterns->hashPatterns, patterns->hashPatternsSize);
 	fprintf(outStream, ",\n");
 
-	fprintf(outStream, "  .shiftTabSize = %u, //NOLINT\n", params->shiftTabSize);
-	bbtgen_writeTable(outStream, "shifts", params->shifts, params->shiftTabSize);
+	fprintf(outStream, "  .commandPatternsSize = %u, //NOLINT\n", patterns->commandPatternsSize);
+	bbtgen_writeTable(outStream, "commandPatterns", patterns->commandPatterns, patterns->commandPatternsSize);
 	fprintf(outStream, "};\n");
 }
 
-void bbt_hash_free_params(struct bbt_hash_params *params) {
-	free(params->patterns);
-	free(params->shifts);
-	free(params);
+void bbt_hash_free_patterns(struct bbt_hash_patterns *patterns) {
+	free(patterns->hashPatterns);
+	free(patterns->commandPatterns);
+	free(patterns);
 }
 

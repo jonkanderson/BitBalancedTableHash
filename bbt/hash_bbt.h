@@ -25,38 +25,38 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #error "BBT_HASH_WIDTH is not defined."
 #endif
 
-struct bbt_hash_params {
-	unsigned patternTabSize;
-	bbt_hash_t *patterns;
-	unsigned shiftTabSize;
-	bbt_hash_t *shifts;
+struct bbt_hash_patterns {
+	unsigned hashPatternsSize;
+	bbt_hash_t *hashPatterns;
+	unsigned commandPatternsSize;
+	bbt_hash_t *commandPatterns;
 };
 
 typedef struct bbt_hash_ctxt {
-	struct bbt_hash_params *params;
-	bbt_hash_t hash;
-	bbt_hash_t shiftSource;
+	struct bbt_hash_patterns *patterns;
+	bbt_hash_t hashAccum;
+	bbt_hash_t commandAccum;
+	unsigned hashPatternsPos;
+	unsigned commandPatternsPos;
 	unsigned inputSize;
-	unsigned patternsPos;
-	unsigned shiftsPos;
 } bbt_hash_ctxt;
 
 /*
  * Usage notes:
- *   bbt_hash_init = Initializes a hash context that has been pre-allocated. 
- *   bbt_hash_reset = Re-initializes a hash context using the same parameters. 
- *   bbt_hash_calc = Consumes input into the hash.  This can be called multiple times 
+ *   bbt_hash_init = Initializes a hash context that has been pre-allocated.
+ *   bbt_hash_reset = Re-initializes a hash context using the same patterns.
+ *   bbt_hash_calc = Consumes input into the hash.  This can be called multiple times
  *      to add more input into the hash.
- *   BBT_HASH_GET = Macro to get the current hash attribute.  This may not include 
- *      the most recent input.
- *   bbt_hash_getHash = Pushes zeros into a copy of the machine to utilize the rest of the 
- *      input.  Original state is unchanged. Also, as a special case, the empty string always 
- *      returns a hash value of 0.
+ *   BBT_HASH_GET = Macro to get the current hash accumulator value.  This
+ *      does not include the full effects of the most recent input bytes added.
+ *   bbt_hash_getHash = Pushes zeros into a copy of the machine to utilize the
+ *      rest of the input.  Original state is unchanged. Also, as a special case,
+ *      the empty string always returns a hash value of 0.
  */
 
-#define BBT_HASH_GET(C) ((C)->hash)
+#define BBT_HASH_GET(C) ((C)->hashAccum)
 
-void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_params *params);
+void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_patterns *patterns);
 void bbt_hash_reset(bbt_hash_ctxt *ctxt);
 void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz);
 bbt_hash_t bbt_hash_getHash(bbt_hash_ctxt *ctxt);

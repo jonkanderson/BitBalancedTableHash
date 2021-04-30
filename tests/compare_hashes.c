@@ -1,5 +1,5 @@
-/* This takes two hash methods and calculates the entropy for each bit 
- * position separately.  The position of least entropy is also determined 
+/* This takes two hash methods and calculates the entropy for each bit
+ * position separately.  The position of least entropy is also determined
  * in the report.
  */
 
@@ -7,9 +7,9 @@
 
 /* Jenkin's hash.  This list of 20 numbers was randomly chosen using R. */
 const unsigned jen_init_nums[] = {
-	2118065031, 1708005758, 1704588144, 924421376, 2364985521, 
-	552754112, 1350635658, 420655580, 3111761921, 1421260411, 
-	506174658, 3293530468, 3940422494, 2378250901, 2733653678, 
+	2118065031, 1708005758, 1704588144, 924421376, 2364985521,
+	552754112, 1350635658, 420655580, 3111761921, 1421260411,
+	506174658, 3293530468, 3940422494, 2378250901, 2733653678,
 	2857399545, 4099450769, 3345902600, 2597697023, 803379642};
 extern unsigned jen_hash(unsigned char *k, unsigned length, unsigned initval);
 #define JEN_INDEX 0
@@ -21,7 +21,7 @@ uint64_t calc_hash_jen(void *hash_info, unsigned char *str, unsigned length) {
 /* Bit-balanced Table hash */
 #include "hash_bbt.h"
 #define BBT_HASH_TABLE bbt_table_1
-extern struct bbt_hash_params BBT_HASH_TABLE;
+extern struct bbt_hash_patterns BBT_HASH_TABLE;
 
 uint64_t calc_hash_bbt(void *hash_info, unsigned char *str, unsigned length) {
 	bbt_hash_ctxt *ctxt = (bbt_hash_ctxt*)hash_info;

@@ -1,7 +1,7 @@
 /*
  * This version uses the Jenkins hash.
- * 
- * Read stdin line by line and hash it. The each byte position is written 
+ *
+ * Read stdin line by line and hash it. The each byte position is written
  * into five binary files for efficiency analysis. (The last is all combined.)
  */
 

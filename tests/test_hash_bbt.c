@@ -1,7 +1,7 @@
 /*
  * This version uses the my new hash.
- * 
- * Read stdin line by line and hash it. The each byte position is written 
+ *
+ * Read stdin line by line and hash it. The each byte position is written
  * into five binary files for efficiency analysis. (The last is all combined.)
  */
 
@@ -11,7 +11,7 @@
 #include "hash_bbt.h"
 
 #define HASH_TABLE bbt_table_1
-extern struct bbt_hash_params HASH_TABLE;
+extern struct bbt_hash_patterns HASH_TABLE;
 
 #define STR_BUFFER_SZ 512
 

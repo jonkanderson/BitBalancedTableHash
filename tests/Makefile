@@ -73,7 +73,7 @@ test2: $(OUT_DIR)/hash02_basic
 #--------------------------------------
 TEST_HASH_CMD=cat /usr/share/dict/words
 
-$(OUT_DIR)/test_hash_jen: test_hash_jen.c 
+$(OUT_DIR)/test_hash_jen: test_hash_jen.c
 	mkdir -p $(OUT_DIR)
 	$(CC) -g -o $@ $<
 
@@ -81,7 +81,7 @@ test3-jen: $(OUT_DIR)/test_hash_jen $(OUT_DIR)/exp01
 	$(TEST_HASH_CMD) | exec $<
 	for E in $(patsubst %,$(OUT_DIR)/jen-%.dat,0 1 2 3 4) ; do ( cat $$E | $(OUT_DIR)/exp01) ; done
 
-$(OUT_DIR)/test_hash_bbt: test_hash_bbt.c $(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_tables.o ../bbt/hash_bbt.h 
+$(OUT_DIR)/test_hash_bbt: test_hash_bbt.c $(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_tables.o ../bbt/hash_bbt.h
 	mkdir -p $(OUT_DIR)
 	$(CC) -g -o $@ $< -I ../bbt \
 		$(OUT_DIR)/hash_bbt.o $(OUT_DIR)/hash_tables.o -D BBT_HASH_WIDTH=$(BBT_HASH_WIDTH)
@@ -113,8 +113,8 @@ test4-bbt: $(OUT_DIR)/test_hash_bbt $(OUT_DIR)/exp01 $(OUT_DIR)/test4_data
 # This test4 reveals whether I am losing bits of entropy.
 # It appears that I am very close to Jenkins hash now, but twice as slow.
 
-# Test 5 is finding what to expect from randomness.  I am using 2M of 
-# random data.  Unfortunately I am using the same data for each data 
+# Test 5 is finding what to expect from randomness.  I am using 2M of
+# random data.  Unfortunately I am using the same data for each data
 # point which is wrong.
 $(OUT_DIR)/test5_data.txt:
 	for N in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 ; do ( \
@@ -189,7 +189,7 @@ $(OUT_DIR)/test7_oneBit: test7_oneBit.c $(TEST7_DEPS)
 TEST7_FILE_SZ=1048576
 
 run_test7_oneBit: $(OUT_DIR)/test7_oneBit
-	for BIT_POS in $$(seq 0 32) ; do \
+	for BIT_POS in 0 1 2 31 32 33 63 64 65 ; do \
 		FILE=$$($(TEMPFILE_CMD)) ; \
 		SEED=$$($(RANDNUM_CMD)) ; \
 		echo "Seed: $$SEED" ; \

@@ -1,7 +1,7 @@
 /*
- * Use the hashing algorithm as a random number generator.  Use two hashing 
- * contexts.  The next pseudo-random unsigned char is taken from the hash of 
- * one of them and the rest of the hash is fed into the other. On each 
+ * Use the hashing algorithm as a random number generator.  Use two hashing
+ * contexts.  The next pseudo-random unsigned char is taken from the hash of
+ * one of them and the rest of the hash is fed into the other. On each
  * iteration the contexts switch roles.
  */
 
@@ -14,8 +14,8 @@
 #define PARAMS_1 bbt_table_2
 #define PARAMS_2 bbt_table_3
 
-extern struct bbt_hash_params PARAMS_1;
-extern struct bbt_hash_params PARAMS_2;
+extern struct bbt_hash_patterns PARAMS_1;
+extern struct bbt_hash_patterns PARAMS_2;
 
 int main(int argc, char *argv[]) {
 	unsigned long int ouputLength;

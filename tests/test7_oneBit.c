@@ -1,9 +1,9 @@
 /*
  * Test the effective difference of a single bit changing on the input.
- * 
- * This test uses random data as input. A hash is calculates.  A bit is 
+ *
+ * This test uses random data as input. A hash is calculates.  A bit is
  * changed on the input at one location. Another hash is calculated.
- * Both hashes are XOR'ed and sent to output as a binary stream. This 
+ * Both hashes are XOR'ed and sent to output as a binary stream. This
  * is repeated until the output length is reached.
  */
 
@@ -17,7 +17,7 @@
 #include <string.h>
 
 #define HASH_PARAMS bbt_table_1
-extern struct bbt_hash_params HASH_PARAMS;
+extern struct bbt_hash_patterns HASH_PARAMS;
 
 #define HASH_INPUT_SZ 32
 
@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
 	unsigned argPos = 1;
 	FILE *outfile = fopen(argv[argPos++], "w");
 	unsigned long int bitPos = strtoul(argv[argPos++], NULL, 10);
-	if (bitPos > 8*(HASH_INPUT_SZ-1)) {
+	if (bitPos > ((8*HASH_INPUT_SZ)-1)) {
 		fprintf(stderr, "ERROR: bitPos too large. Beyond end of buffer length.\n");
 		return 1;
 	}
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 
 	unsigned bitIndex = bitPos/8;
 	unsigned bitShift = 7 - (bitPos%8);
-	unsigned bitMask = 1 << bitShift;
+	bbt_hash_t bitMask = ((bbt_hash_t)1) << bitShift;
 
 	printf("Bit change at index %u and shift %u.\n", bitIndex, bitShift);
 

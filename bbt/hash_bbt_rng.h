@@ -18,7 +18,7 @@ typedef struct bbt_rng_ctxt {
 	bbt_hash_ctxt ctxtB;
 } bbt_rng_ctxt;
 
-void bbt_rng_init(bbt_rng_ctxt *rng, struct bbt_hash_params *paramsA, struct bbt_hash_params *paramsB, bbt_hash_t initialHash);
+void bbt_rng_init(bbt_rng_ctxt *rng, struct bbt_hash_patterns *patternsA, struct bbt_hash_patterns *patternsB, bbt_hash_t initialHash);
 void bbt_rng_reset(bbt_rng_ctxt *rng, bbt_hash_t initialHash);
 void bbt_rng_phrase(bbt_rng_ctxt *rng, unsigned char *input, unsigned input_sz);
 bbt_hash_t bbt_rng_next(bbt_rng_ctxt *rng);

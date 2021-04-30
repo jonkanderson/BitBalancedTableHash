@@ -1,8 +1,8 @@
 /*
  * Test the effective difference of a single bit changing on the input.
- * Evaluate each bit position on the first hash against all the bit 
+ * Evaluate each bit position on the first hash against all the bit
  * positions on the other hash for any less than random distribution.
- * 
+ *
  * This tests for the "Bit Independence Criterion" of this hash.
  */
 
@@ -16,7 +16,7 @@
 #include <string.h>
 
 #define HASH_PARAMS bbt_table_1
-extern struct bbt_hash_params HASH_PARAMS;
+extern struct bbt_hash_patterns HASH_PARAMS;
 
 #define HASH_INPUT_SZ 32
 //#define SAMPLE_SZ 1048576
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 
 	unsigned argPos = 1;
 	unsigned long int bitPos = strtoul(argv[argPos++], NULL, 10);
-	if (bitPos > 8*(HASH_INPUT_SZ-1)) {
+	if (bitPos > ((8*HASH_INPUT_SZ)-1)) {
 		fprintf(stderr, "ERROR: bitPos too large. Beyond end of buffer length.\n");
 		return 1;
 	}
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 
 	unsigned bitIndex = bitPos/8;
 	unsigned bitShift = 7 - (bitPos%8);
-	unsigned bitMask = 1 << bitShift;
+	bbt_hash_t bitMask = ((bbt_hash_t)1) << bitShift;
 
 	bbt_hash_t bitMatrix[HASH_BITS_COUNT];
 	unsigned countMatrix[COUNT_MATRIX_SZ];

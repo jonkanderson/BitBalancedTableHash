@@ -1,5 +1,5 @@
 /*
- * This is just making some hash functions work.  In another test I will 
+ * This is just making some hash functions work.  In another test I will
  * create a binary file of parts of hashes in order to test the entropy.
  */
 
@@ -10,7 +10,7 @@
 #include "hash_bbt.h"
 
 #define HASH_TABLE bbt_table_1
-extern struct bbt_hash_params HASH_TABLE;
+extern struct bbt_hash_patterns HASH_TABLE;
 
 #include "hash_jen.c"
 const unsigned jen_init = 37428652;

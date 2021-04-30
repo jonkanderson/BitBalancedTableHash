@@ -13,15 +13,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "string.h"
 
 void print_usage(FILE *f, char *prog) {
-	fprintf(f, "Usage: %s <varname> <patternTabSize> <shiftTabSize> <seed>\n", prog);
+	fprintf(f, "Usage: %s <varname> <hashPatternsSize> <commandPatternsSize> <seed>\n", prog);
 	fprintf(f, "Example: %s bbt_table 37 13 64 819607651\n", prog);
 	fprintf(f, "Output goes to stdout.\n");
 }
 
 int main(int argc, char *argv[]) {
 	char *varname;
-	unsigned long int patternTabSize;
-	unsigned long int shiftTabSize;
+	unsigned long int hashPatternsSize;
+	unsigned long int commandPatternsSize;
 	unsigned long int seed;
 
 	if (argc < 4) {
@@ -33,16 +33,16 @@ int main(int argc, char *argv[]) {
 
 	varname = argv[argPos++];
 
-	patternTabSize = strtoul(argv[argPos++], NULL, 10);
-	if (patternTabSize <= 1) {
-		fprintf(stderr, "ERROR: patternTabSize must be greater than 1.\n");
+	hashPatternsSize = strtoul(argv[argPos++], NULL, 10);
+	if (hashPatternsSize <= 1) {
+		fprintf(stderr, "ERROR: hashPatternsSize must be greater than 1.\n");
 		print_usage(stderr, argv[0]);
 		return 1;
 	}
 
-	shiftTabSize = strtoul(argv[argPos++], NULL, 10);
-	if (shiftTabSize <= 1) {
-		fprintf(stderr, "ERROR: shiftTabSize must be greater than 1.\n");
+	commandPatternsSize = strtoul(argv[argPos++], NULL, 10);
+	if (commandPatternsSize <= 1) {
+		fprintf(stderr, "ERROR: commandPatternsSize must be greater than 1.\n");
 		print_usage(stderr, argv[0]);
 		return 1;
 	}
@@ -54,9 +54,9 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	struct bbt_hash_params *params = bbt_hash_create_params(patternTabSize, shiftTabSize, seed);
-	bbt_write_params(stdout, params, varname);
-	bbt_hash_free_params(params);
+	struct bbt_hash_patterns *patterns = bbt_hash_create_patterns(hashPatternsSize, commandPatternsSize, seed);
+	bbt_write_patterns(stdout, patterns, varname);
+	bbt_hash_free_patterns(patterns);
 
 	return 0;
 }

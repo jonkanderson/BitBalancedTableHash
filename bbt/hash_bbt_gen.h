@@ -19,9 +19,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <stdio.h>
 #include <stdlib.h>
 
-struct bbt_hash_params *bbt_hash_create_params(unsigned patternTabCount, unsigned shiftTabCount, unsigned seed);
-void bbt_write_params(FILE *outStream, struct bbt_hash_params *params, char *varname);
-void bbt_hash_free_params(struct bbt_hash_params *params);
+struct bbt_hash_patterns *bbt_hash_create_patterns(unsigned hashPatternsSize, unsigned commandPatternsSize, unsigned seed);
+void bbt_write_patterns(FILE *outStream, struct bbt_hash_patterns *patterns, char *varname);
+void bbt_hash_free_patterns(struct bbt_hash_patterns *patterns);
 
 #endif
 

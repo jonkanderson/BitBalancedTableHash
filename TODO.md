@@ -4,4 +4,4 @@
 - Separate testing directories
 	- Deterministic tests -- based on saved params
 	- Deterministic test results -- for regression / unit testing
-	- Non-deterministic tests on both saved params and newly generated params.
+	- Non-deterministic tests on both saved patterns and newly generated patterns.
