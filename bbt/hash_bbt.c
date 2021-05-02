@@ -45,14 +45,34 @@ void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz)
 
 	unsigned char *inputPtr = input;
 	for (unsigned i=0; i<input_sz; i++, inputPtr++) {
-		// Get cmdRot and cmdAdvance.  Input only influences the way that commandAccum changes.
-		buffer = ctxt->commandAccum ^ ((bbt_hash_t)*inputPtr);
+		// Input only influences the way that commandAccum changes.
+		bbt_hash_t inByte = *inputPtr;
+
+		// Get cmdRot and cmdAdvance.  Using the first nibble of the input.
+		buffer = ctxt->commandAccum ^ (inByte & 0x0F);
 		cmdRot = (buffer & 0x1F);
 		buffer = (ctxt->commandAccum >> 6) ^ ((bbt_hash_t)*inputPtr);
 		cmdAdvance = (buffer & 0xFF) + 1;
+		ctxt->commandAccum = BIT_ROTATE(ctxt->commandAccum, 7);
+
+		// Apply first iteration to command generator.
+		buffer= patterns->commandPatterns[ctxt->commandPatternsPos];
+		if (cmdRot > 0) {
+			buffer = BIT_ROTATE(buffer, cmdRot);
+		}
+		ctxt->commandAccum ^= buffer;
+		ctxt->commandPatternsPos = (ctxt->commandPatternsPos + cmdAdvance) % patterns->commandPatternsSize;
+
+		inByte = inByte>>4;
+
+		// Get cmdRot and cmdAdvance.  Using the second nibble of the input.
+		buffer = ctxt->commandAccum ^ inByte;
+		cmdRot = (buffer & 0x1F);
+		buffer = (ctxt->commandAccum >> 5) ^ ((bbt_hash_t)*inputPtr);
+		cmdAdvance = (buffer & 0xFF) + 1;
 		ctxt->commandAccum = BIT_ROTATE(ctxt->commandAccum, 8);
 
-		// Prepare commandAccum for the next iteration using the commandPatterns pattern.
+		// Apply second iteration to command generator.
 		buffer= patterns->commandPatterns[ctxt->commandPatternsPos];
 		if (cmdRot > 0) {
 			buffer = BIT_ROTATE(buffer, cmdRot);
