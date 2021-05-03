@@ -14,19 +14,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_patterns *patterns) {
 	ctxt->patterns = patterns;
-	ctxt->hashAccum = 0;
-	ctxt->commandAccum = patterns->commandPatterns[0];
 	ctxt->inputSize = 0;
-	ctxt->hashPatternsPos = 0;
-	ctxt->commandPatternsPos = 0;
+	ctxt->command.accum = patterns->commandPatterns[0];
+	ctxt->command.pos = 0;
+	ctxt->hash.accum = 0;
+	ctxt->hash.pos = 0;
 }
 
 void bbt_hash_reset(bbt_hash_ctxt *ctxt) {
-	ctxt->hashAccum = 0;
-	ctxt->commandAccum = ctxt->patterns->commandPatterns[0];
 	ctxt->inputSize = 0;
-	ctxt->hashPatternsPos = 0;
-	ctxt->commandPatternsPos = 0;
+	ctxt->command.accum = ctxt->patterns->commandPatterns[0];
+	ctxt->command.pos = 0;
+	ctxt->hash.accum = 0;
+	ctxt->hash.pos = 0;
 }
 
 // BIT_ROTATE moves ROT bits from the high end to low.
@@ -49,49 +49,49 @@ void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz)
 		bbt_hash_t inByte = *inputPtr;
 
 		// Get cmdRot and cmdAdvance.  Using the first nibble of the input.
-		buffer = ctxt->commandAccum ^ (inByte & 0x0F);
+		buffer = ctxt->command.accum ^ (inByte & 0x0F);
 		cmdRot = (buffer & 0x1F);
-		buffer = (ctxt->commandAccum >> 6) ^ ((bbt_hash_t)*inputPtr);
+		buffer = (ctxt->command.accum >> 6) ^ inByte;
 		cmdAdvance = (buffer & 0xFF) + 1;
-		ctxt->commandAccum = BIT_ROTATE(ctxt->commandAccum, 7);
+		ctxt->command.accum = BIT_ROTATE(ctxt->command.accum, 7);
 
 		// Apply first iteration to command generator.
-		buffer= patterns->commandPatterns[ctxt->commandPatternsPos];
+		buffer= patterns->commandPatterns[ctxt->command.pos];
 		if (cmdRot > 0) {
 			buffer = BIT_ROTATE(buffer, cmdRot);
 		}
-		ctxt->commandAccum ^= buffer;
-		ctxt->commandPatternsPos = (ctxt->commandPatternsPos + cmdAdvance) % patterns->commandPatternsSize;
+		ctxt->command.accum ^= buffer;
+		ctxt->command.pos = (ctxt->command.pos + cmdAdvance) % patterns->commandPatternsSize;
 
 		inByte = inByte>>4;
 
 		// Get cmdRot and cmdAdvance.  Using the second nibble of the input.
-		buffer = ctxt->commandAccum ^ inByte;
+		buffer = ctxt->command.accum ^ inByte;
 		cmdRot = (buffer & 0x1F);
-		buffer = (ctxt->commandAccum >> 5) ^ ((bbt_hash_t)*inputPtr);
+		buffer = (ctxt->command.accum >> 5) ^ inByte;
 		cmdAdvance = (buffer & 0xFF) + 1;
-		ctxt->commandAccum = BIT_ROTATE(ctxt->commandAccum, 8);
+		ctxt->command.accum = BIT_ROTATE(ctxt->command.accum, 8);
 
 		// Apply second iteration to command generator.
-		buffer= patterns->commandPatterns[ctxt->commandPatternsPos];
+		buffer= patterns->commandPatterns[ctxt->command.pos];
 		if (cmdRot > 0) {
 			buffer = BIT_ROTATE(buffer, cmdRot);
 		}
-		ctxt->commandAccum ^= buffer;
-		ctxt->commandPatternsPos = (ctxt->commandPatternsPos + cmdAdvance) % patterns->commandPatternsSize;
+		ctxt->command.accum ^= buffer;
+		ctxt->command.pos = (ctxt->command.pos + cmdAdvance) % patterns->commandPatternsSize;
 
 		// Get hashRot and hashAdvance from the current commandAccum.
-		hashRot = ctxt->commandAccum & 0x1F;
-		hashAdvance = ((ctxt->commandAccum >> 5) & 0xFF) + 1;
-		ctxt->commandAccum = BIT_ROTATE(ctxt->commandAccum, 8);
+		hashRot = ctxt->command.accum & 0x1F;
+		hashAdvance = ((ctxt->command.accum >> 5) & 0xFF) + 1;
+		ctxt->command.accum = BIT_ROTATE(ctxt->command.accum, 8);
 
 		// Calculate the next value on the hash using the pattern.
-		ctxt->hashPatternsPos = (ctxt->hashPatternsPos + hashAdvance) % patterns->hashPatternsSize;
-		buffer = patterns->hashPatterns[ctxt->hashPatternsPos];
+		ctxt->hash.pos = (ctxt->hash.pos + hashAdvance) % patterns->hashPatternsSize;
+		buffer = patterns->hashPatterns[ctxt->hash.pos];
 		if (hashRot > 0) {
 			buffer = BIT_ROTATE(buffer, hashRot);
 		}
-		ctxt->hashAccum ^= buffer;
+		ctxt->hash.accum ^= buffer;
 	}
 }
 

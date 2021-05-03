@@ -13,13 +13,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 void bbt_rng_init(bbt_rng_ctxt *rng, struct bbt_hash_patterns *patternsA, struct bbt_hash_patterns *patternsB, bbt_hash_t initialHash) {
 	bbt_hash_init(&rng->ctxtA, patternsA);
 	bbt_hash_init(&rng->ctxtB, patternsB);
-	rng->ctxtA.hashAccum = initialHash;
+	rng->ctxtA.hash.accum = initialHash;
 }
 
 void bbt_rng_reset(bbt_rng_ctxt *rng, bbt_hash_t initialHash) {
 	bbt_hash_reset(&rng->ctxtA);
 	bbt_hash_reset(&rng->ctxtB);
-	rng->ctxtA.hashAccum = initialHash;
+	rng->ctxtA.hash.accum = initialHash;
 }
 
 void bbt_rng_phrase(bbt_rng_ctxt *rng, unsigned char *input, unsigned input_sz){

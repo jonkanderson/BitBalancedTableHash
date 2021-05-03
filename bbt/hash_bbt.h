@@ -25,19 +25,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #error "BBT_HASH_WIDTH is not defined."
 #endif
 
-struct bbt_hash_patterns {
+typedef struct bbt_hash_patterns {
 	unsigned hashPatternsSize;
 	bbt_hash_t *hashPatterns;
 	unsigned commandPatternsSize;
 	bbt_hash_t *commandPatterns;
+} bbt_hash_patterns;
+
+struct bbt_hash_ctxt_gen {
+	bbt_hash_t accum;
+	unsigned pos;
 };
 
 typedef struct bbt_hash_ctxt {
 	struct bbt_hash_patterns *patterns;
-	bbt_hash_t hashAccum;
-	bbt_hash_t commandAccum;
-	unsigned hashPatternsPos;
-	unsigned commandPatternsPos;
+	struct bbt_hash_ctxt_gen command;
+	struct bbt_hash_ctxt_gen hash;
 	unsigned inputSize;
 } bbt_hash_ctxt;
 
@@ -54,7 +57,7 @@ typedef struct bbt_hash_ctxt {
  *      the empty string always returns a hash value of 0.
  */
 
-#define BBT_HASH_GET(C) ((C)->hashAccum)
+#define BBT_HASH_GET(C) ((C)->hash.accum)
 
 void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_patterns *patterns);
 void bbt_hash_reset(bbt_hash_ctxt *ctxt);
