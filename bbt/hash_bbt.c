@@ -15,16 +15,21 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 void bbt_hash_init(bbt_hash_ctxt *ctxt, struct bbt_hash_patterns *patterns) {
 	ctxt->patterns = patterns;
 	ctxt->inputSize = 0;
-	ctxt->command.accum = patterns->commandPatterns[0];
-	ctxt->command.pos = 0;
+	ctxt->commandA.accum = patterns->commandPatterns[0];
+	ctxt->commandA.pos = 0;
+	ctxt->commandB.accum = patterns->commandPatterns[1];
+	ctxt->commandB.pos = 0;
 	ctxt->hash.accum = 0;
 	ctxt->hash.pos = 0;
 }
 
 void bbt_hash_reset(bbt_hash_ctxt *ctxt) {
+	struct bbt_hash_patterns *patterns = ctxt->patterns;
 	ctxt->inputSize = 0;
-	ctxt->command.accum = ctxt->patterns->commandPatterns[0];
-	ctxt->command.pos = 0;
+	ctxt->commandA.accum = patterns->commandPatterns[0];
+	ctxt->commandA.pos = 0;
+	ctxt->commandB.accum = patterns->commandPatterns[1];
+	ctxt->commandB.pos = 0;
 	ctxt->hash.accum = 0;
 	ctxt->hash.pos = 0;
 }
@@ -32,58 +37,58 @@ void bbt_hash_reset(bbt_hash_ctxt *ctxt) {
 // BIT_ROTATE moves ROT bits from the high end to low.
 #define BIT_ROTATE(HASH,ROT) ((bbt_hash_t)((HASH)<<(ROT)) | (bbt_hash_t)((HASH)>>(BBT_HASH_WIDTH - (ROT))))
 
-void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz) {
+void bbt_hash_cmdIterate(
+	bbt_hash_t *patArray, unsigned patSz,
+	struct bbt_hash_ctxt_gen *gen, unsigned char input
+) {
 	unsigned int cmdRot, cmdAdvance;
+	bbt_hash_t buffer;
+	// Get cmdRot and cmdAdvance.  Using the nibble of input.
+	buffer = gen->accum ^ input;
+	cmdRot = (buffer & 0x1F);
+	buffer = (gen->accum >> 6) ^ input;
+	cmdAdvance = (buffer & 0x0F) + 1;
+	gen->accum = BIT_ROTATE(gen->accum, 10);
+
+	buffer= patArray[gen->pos];
+	if (cmdRot > 0) {
+		buffer = BIT_ROTATE(buffer, cmdRot);
+	}
+	gen->accum ^= buffer;
+	gen->pos = (gen->pos + cmdAdvance) % patSz;
+}
+
+void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz) {
 	unsigned int hashRot, hashAdvance;
 	bbt_hash_t buffer;
 	struct bbt_hash_patterns *patterns = ctxt->patterns;
 
-	// Special case.  No input gets a hash value of 0.
+	// Special case.  The empty string gets a hash value of 0.
 	if (input_sz == 0) return;
 
 	ctxt->inputSize += input_sz;
 
 	unsigned char *inputPtr = input;
 	for (unsigned i=0; i<input_sz; i++, inputPtr++) {
-		// Input only influences the way that commandAccum changes.
+		// Input only influences the way that command accumulators change.
 		bbt_hash_t inByte = *inputPtr;
 
-		// Get cmdRot and cmdAdvance.  Using the first nibble of the input.
-		buffer = ctxt->command.accum ^ (inByte & 0x0F);
-		cmdRot = (buffer & 0x1F);
-		buffer = (ctxt->command.accum >> 6) ^ inByte;
-		cmdAdvance = (buffer & 0xFF) + 1;
-		ctxt->command.accum = BIT_ROTATE(ctxt->command.accum, 7);
+		bbt_hash_cmdIterate(
+			patterns->commandPatterns, patterns->commandPatternsSize,
+			&ctxt->commandA, inByte & 0x0F);
 
-		// Apply first iteration to command generator.
-		buffer= patterns->commandPatterns[ctxt->command.pos];
-		if (cmdRot > 0) {
-			buffer = BIT_ROTATE(buffer, cmdRot);
-		}
-		ctxt->command.accum ^= buffer;
-		ctxt->command.pos = (ctxt->command.pos + cmdAdvance) % patterns->commandPatternsSize;
+		inByte = inByte >> 4;
 
-		inByte = inByte>>4;
+		bbt_hash_cmdIterate(
+			patterns->commandPatterns, patterns->commandPatternsSize,
+			&ctxt->commandB, inByte & 0x0F);
 
-		// Get cmdRot and cmdAdvance.  Using the second nibble of the input.
-		buffer = ctxt->command.accum ^ inByte;
-		cmdRot = (buffer & 0x1F);
-		buffer = (ctxt->command.accum >> 5) ^ inByte;
-		cmdAdvance = (buffer & 0xFF) + 1;
-		ctxt->command.accum = BIT_ROTATE(ctxt->command.accum, 8);
-
-		// Apply second iteration to command generator.
-		buffer= patterns->commandPatterns[ctxt->command.pos];
-		if (cmdRot > 0) {
-			buffer = BIT_ROTATE(buffer, cmdRot);
-		}
-		ctxt->command.accum ^= buffer;
-		ctxt->command.pos = (ctxt->command.pos + cmdAdvance) % patterns->commandPatternsSize;
-
-		// Get hashRot and hashAdvance from the current commandAccum.
-		hashRot = ctxt->command.accum & 0x1F;
-		hashAdvance = ((ctxt->command.accum >> 5) & 0xFF) + 1;
-		ctxt->command.accum = BIT_ROTATE(ctxt->command.accum, 8);
+		// Get hashRot and hashAdvance from the current command accumulators.
+		buffer = ctxt->commandA.accum ^ ctxt->commandB.accum;
+		hashRot = buffer & 0x1F;
+		hashAdvance = ((buffer >> 5) & 0xFF) + 1;
+		ctxt->commandA.accum = BIT_ROTATE(ctxt->commandA.accum, 8);
+		ctxt->commandB.accum = BIT_ROTATE(ctxt->commandB.accum, 8);
 
 		// Calculate the next value on the hash using the pattern.
 		ctxt->hash.pos = (ctxt->hash.pos + hashAdvance) % patterns->hashPatternsSize;

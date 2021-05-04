@@ -39,7 +39,8 @@ struct bbt_hash_ctxt_gen {
 
 typedef struct bbt_hash_ctxt {
 	struct bbt_hash_patterns *patterns;
-	struct bbt_hash_ctxt_gen command;
+	struct bbt_hash_ctxt_gen commandA;
+	struct bbt_hash_ctxt_gen commandB;
 	struct bbt_hash_ctxt_gen hash;
 	unsigned inputSize;
 } bbt_hash_ctxt;
