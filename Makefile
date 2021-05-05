@@ -1,6 +1,6 @@
 .PHONY: all
 all:
-	cd tests ; $(MAKE)
+	cd bbt ; $(MAKE)
 
 #-------------------------------- House keeping
 .PHONY: pristine

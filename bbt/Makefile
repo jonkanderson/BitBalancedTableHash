@@ -1,12 +1,10 @@
-OUT_DIR=../out
-CC=/usr/bin/clang
+ROOT_DIR=..
+OUT_DIR=$(ROOT_DIR)/out
 
 OBJS_FROM_LOCAL_SRC= \
 	$(OUT_DIR)/hash_bbt.o \
 	$(OUT_DIR)/hash_bbt_gen.o \
 	$(OUT_DIR)/hash_bbt_rng.o
-
-CC_FLAGS=-g -fPIC
 
 .PHONY: all
 all: $(OBJS_FROM_LOCAL_SRC) $(OUT_DIR)/hash_tables.o

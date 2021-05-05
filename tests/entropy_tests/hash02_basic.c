@@ -12,7 +12,7 @@
 #define HASH_TABLE bbt_table_1
 extern struct bbt_hash_patterns HASH_TABLE;
 
-#include "hash_jen.c"
+unsigned jen_hash(unsigned char *k, unsigned length, unsigned initval);
 const unsigned jen_init = 37428652;
 
 int main(int argc, char **argv) {

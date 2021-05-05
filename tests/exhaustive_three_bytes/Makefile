@@ -2,22 +2,18 @@ ROOT_DIR=../..
 OUT_DIR=$(ROOT_DIR)/out
 TGT_DIR=$(OUT_DIR)/exhaustive_three_bytes
 
-CC=/usr/bin/clang
-
-BBT_HASH_WIDTH=64
-
 OBJS_FROM_LOCAL_SRC= \
 	$(OUT_DIR)/hash_bbt.o \
 	$(OUT_DIR)/hash_bbt_gen.o \
 	$(OUT_DIR)/hash_bbt_rng.o
-
-CC_FLAGS=-g -fPIC
 
 .PHONY: all
 all:
 	@echo "This test searches for hash conflicts in any combination of one to three bytes."
 	@echo "The data files it produces amounts to 386 MB."
 	@echo "Run the test by typing: make run_test_1"
+
+include $(ROOT_DIR)/bbt/settings.mk
 
 .PHONY: proposed_tables
 proposed_tables: $(TGT_DIR)/ht_proposed.c

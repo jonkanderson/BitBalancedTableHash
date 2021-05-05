@@ -37,28 +37,8 @@ void bbt_hash_reset(bbt_hash_ctxt *ctxt) {
 // BIT_ROTATE moves ROT bits from the high end to low.
 #define BIT_ROTATE(HASH,ROT) ((bbt_hash_t)((HASH)<<(ROT)) | (bbt_hash_t)((HASH)>>(BBT_HASH_WIDTH - (ROT))))
 
-void bbt_hash_cmdIterate(
-	bbt_hash_t *patArray, unsigned patSz,
-	struct bbt_hash_ctxt_gen *gen, unsigned char input
-) {
-	unsigned int cmdRot, cmdAdvance;
-	bbt_hash_t buffer;
-	// Get cmdRot and cmdAdvance.  Using the nibble of input.
-	buffer = gen->accum ^ input;
-	cmdRot = (buffer & 0x1F);
-	buffer = (gen->accum >> 6) ^ input;
-	cmdAdvance = (buffer & 0x0F) + 1;
-	gen->accum = BIT_ROTATE(gen->accum, 10);
-
-	buffer= patArray[gen->pos];
-	if (cmdRot > 0) {
-		buffer = BIT_ROTATE(buffer, cmdRot);
-	}
-	gen->accum ^= buffer;
-	gen->pos = (gen->pos + cmdAdvance) % patSz;
-}
-
 void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz) {
+	unsigned int cmdRot, cmdAdvance;
 	unsigned int hashRot, hashAdvance;
 	bbt_hash_t buffer;
 	struct bbt_hash_patterns *patterns = ctxt->patterns;
@@ -68,36 +48,64 @@ void bbt_hash_calc(bbt_hash_ctxt *ctxt, unsigned char *input, unsigned input_sz)
 
 	ctxt->inputSize += input_sz;
 
+	// Work with a local context for efficiency.
+	bbt_hash_ctxt tempCtxt;
+	memcpy(&tempCtxt, ctxt, sizeof(bbt_hash_ctxt));
+
 	unsigned char *inputPtr = input;
 	for (unsigned i=0; i<input_sz; i++, inputPtr++) {
 		// Input only influences the way that command accumulators change.
 		bbt_hash_t inByte = *inputPtr;
 
-		bbt_hash_cmdIterate(
-			patterns->commandPatterns, patterns->commandPatternsSize,
-			&ctxt->commandA, inByte & 0x0F);
+		// Get cmdRot and cmdAdvance.  Using the nibble of input for commandA.
+		buffer = tempCtxt.commandA.accum ^ (inByte & 0x0F);
+		cmdRot = (buffer & 0x1F);
+		buffer = (tempCtxt.commandA.accum >> 6) ^ (inByte & 0x0F);
+		cmdAdvance = (buffer & 0x0F) + 1;
+		tempCtxt.commandA.accum = BIT_ROTATE(tempCtxt.commandA.accum, 10);
+	
+		buffer= patterns->commandPatterns[tempCtxt.commandA.pos];
+		if (cmdRot > 0) {
+			buffer = BIT_ROTATE(buffer, cmdRot);
+		}
+		tempCtxt.commandA.accum ^= buffer;
+		tempCtxt.commandA.pos = (tempCtxt.commandA.pos + cmdAdvance) % patterns->commandPatternsSize;
 
 		inByte = inByte >> 4;
 
-		bbt_hash_cmdIterate(
-			patterns->commandPatterns, patterns->commandPatternsSize,
-			&ctxt->commandB, inByte & 0x0F);
+		// Get cmdRot and cmdAdvance.  Using the nibble of input for commandB.
+		buffer = tempCtxt.commandB.accum ^ inByte;
+		cmdRot = (buffer & 0x1F);
+		buffer = (tempCtxt.commandB.accum >> 6) ^ inByte;
+		cmdAdvance = (buffer & 0x0F) + 1;
+		tempCtxt.commandB.accum = BIT_ROTATE(tempCtxt.commandB.accum, 10);
+	
+		buffer= patterns->commandPatterns[tempCtxt.commandB.pos];
+		if (cmdRot > 0) {
+			buffer = BIT_ROTATE(buffer, cmdRot);
+		}
+		tempCtxt.commandB.accum ^= buffer;
+		tempCtxt.commandB.pos = (tempCtxt.commandB.pos + cmdAdvance) % patterns->commandPatternsSize;
+
 
 		// Get hashRot and hashAdvance from the current command accumulators.
-		buffer = ctxt->commandA.accum ^ ctxt->commandB.accum;
+		buffer = tempCtxt.commandA.accum ^ tempCtxt.commandB.accum;
 		hashRot = buffer & 0x1F;
 		hashAdvance = ((buffer >> 5) & 0xFF) + 1;
-		ctxt->commandA.accum = BIT_ROTATE(ctxt->commandA.accum, 8);
-		ctxt->commandB.accum = BIT_ROTATE(ctxt->commandB.accum, 8);
+		tempCtxt.commandA.accum = BIT_ROTATE(tempCtxt.commandA.accum, 8);
+		tempCtxt.commandB.accum = BIT_ROTATE(tempCtxt.commandB.accum, 8);
 
 		// Calculate the next value on the hash using the pattern.
-		ctxt->hash.pos = (ctxt->hash.pos + hashAdvance) % patterns->hashPatternsSize;
-		buffer = patterns->hashPatterns[ctxt->hash.pos];
+		tempCtxt.hash.pos = (tempCtxt.hash.pos + hashAdvance) % patterns->hashPatternsSize;
+		buffer = patterns->hashPatterns[tempCtxt.hash.pos];
 		if (hashRot > 0) {
 			buffer = BIT_ROTATE(buffer, hashRot);
 		}
-		ctxt->hash.accum ^= buffer;
+		tempCtxt.hash.accum ^= buffer;
 	}
+
+	// Copy work back from local context.
+	memcpy(ctxt, &tempCtxt, sizeof(bbt_hash_ctxt));
 }
 
 bbt_hash_t bbt_hash_getHash(bbt_hash_ctxt *ctxt) {
@@ -105,7 +113,7 @@ bbt_hash_t bbt_hash_getHash(bbt_hash_ctxt *ctxt) {
 	bbt_hash_t retValue;
 	bbt_hash_ctxt tempCtxt;
 	memcpy(&tempCtxt, ctxt, sizeof(bbt_hash_ctxt));
-	bbt_hash_calc(&tempCtxt, (unsigned char[sizeof(bbt_hash_ctxt)]){}, sizeof(bbt_hash_ctxt));
+	bbt_hash_calc(&tempCtxt, (unsigned char[sizeof(bbt_hash_ctxt)/2]){}, sizeof(bbt_hash_ctxt)/2);
 	return BBT_HASH_GET(&tempCtxt);
 }
 

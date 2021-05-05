@@ -27,9 +27,14 @@ int main(int argc, char **argv) {
 	char b[STR_BUFFER_SZ];
 	bbt_hash_ctxt hc;
 
+	if (argc < 2) {
+		printf("Usage: %s <target directory>\n", argv[0]);
+		return 1;
+	}
+
 	FILE *f[5];
 	for (int i=0; i<5; i++) {
-		sprintf(b, "../out/mix-%d.dat", i);
+		sprintf(b, "%s/mix-%d.dat", argv[1], i);
 		f[i] = fopen(b, "w");
 	}
 

@@ -9,7 +9,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "hash_jen.c"
+unsigned jen_hash(unsigned char *k, unsigned length, unsigned initval);
+
 //const unsigned jen_init = 0xFED43055u; // A random number.
 //const unsigned jen_init = 0x9E8B884Au; // A random number.
 //const unsigned jen_init = 2849719; // Random typing.
@@ -31,9 +32,14 @@ int main(int argc, char **argv) {
 	hash_bytes h;
 	char b[STR_BUFFER_SZ];
 
+	if (argc < 2) {
+		printf("Usage: %s <target directory>\n", argv[0]);
+		return 1;
+	}
+
 	FILE *f[5];
 	for (int i=0; i<5; i++) {
-		sprintf(b, "../out/jen-%d.dat", i);
+		sprintf(b, "%s/jen-%d.dat", argv[1], i);
 		f[i] = fopen(b, "w");
 	}
 
